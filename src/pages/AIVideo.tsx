@@ -121,8 +121,8 @@ const AIVideoCanvas = () => {
   const initialEdges: Edge[] = [
     { id: "e-img1-prompt", source: "image-1", target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
     { id: "e-img2-prompt", source: "image-2", target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
-    { id: "e-prompt-vid1", source: "prompt-1", sourceHandle: "video-out", target: "video-1", animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
-    { id: "e-prompt-vid2", source: "prompt-1", sourceHandle: "video-out", target: "video-2", animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
+    { id: "e-prompt-vid1", source: "prompt-1", sourceHandle: "video-out", target: "video-1", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
+    { id: "e-prompt-vid2", source: "prompt-1", sourceHandle: "video-out", target: "video-2", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
   ];
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
