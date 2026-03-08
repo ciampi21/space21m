@@ -22,6 +22,27 @@ interface AssetSidebarProps {
 export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps) {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+
+  const enhancePrompt = useCallback(async () => {
+    if (!prompt.trim() || isEnhancing) return;
+    setIsEnhancing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("enhance-video-prompt", {
+        body: { prompt: prompt.trim(), imageCount: 1 },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.enhancedPrompt) {
+        setPrompt(data.enhancedPrompt);
+        toast({ title: "Prompt melhorado com IA ✨" });
+      }
+    } catch (e: any) {
+      toast({ title: "Erro ao melhorar prompt", description: e.message, variant: "destructive" });
+    } finally {
+      setIsEnhancing(false);
+    }
+  }, [prompt, isEnhancing]);
   const [generatedAssets, setGeneratedAssets] = useState<SidebarAsset[]>([]);
   const [uploadedAssets, setUploadedAssets] = useState<SidebarAsset[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
