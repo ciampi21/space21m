@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import { Play, Download, Loader2, AlertCircle, Film, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,9 @@ export type VideoNodeData = {
   onGenerate: () => void;
 };
 
-const VideoNode = ({ data, selected }: NodeProps & { data: VideoNodeData }) => {
+type VideoNodeType = Node<VideoNodeData, 'videoNode'>;
+
+const VideoNode = ({ data, selected }: NodeProps<VideoNodeType>) => {
   const { slot } = data;
 
   const statusConfig = {

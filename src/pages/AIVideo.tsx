@@ -349,7 +349,7 @@ const AIVideo = () => {
       </header>
 
       {/* Canvas */}
-      <div className="flex-1 relative">
+      <div className="flex-1" style={{ width: '100%', height: '100%' }}>
         <ReactFlow
           nodes={nodesWithData}
           edges={edges}

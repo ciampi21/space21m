@@ -1,5 +1,5 @@
 import { memo, useCallback, useRef } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,9 @@ export type ImageNodeData = {
   onImageChange: (nodeId: string, file: File | null) => void;
 };
 
-const ImageNode = ({ id, data, selected }: NodeProps & { data: ImageNodeData }) => {
+type ImageNodeType = Node<ImageNodeData, 'imageNode'>;
+
+const ImageNode = ({ id, data, selected }: NodeProps<ImageNodeType>) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(

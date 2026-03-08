@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import { Sparkles, Loader2, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,9 @@ export type PromptNodeData = {
   onEnhance: () => void;
 };
 
-const PromptNode = ({ data, selected }: NodeProps & { data: PromptNodeData }) => {
+type PromptNodeType = Node<PromptNodeData, 'promptNode'>;
+
+const PromptNode = ({ data, selected }: NodeProps<PromptNodeType>) => {
   return (
     <div
       className={cn(
