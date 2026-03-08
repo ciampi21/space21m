@@ -17,7 +17,9 @@ export type PromptNodeData = {
   onEnhance: () => void;
 };
 
-const PromptNode = ({ data, selected }: NodeProps & { data: PromptNodeData }) => {
+type PromptNodeType = Node<PromptNodeData, 'promptNode'>;
+
+const PromptNode = ({ data, selected }: NodeProps<PromptNodeType>) => {
   return (
     <div
       className={cn(

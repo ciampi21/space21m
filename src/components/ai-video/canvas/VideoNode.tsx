@@ -12,7 +12,9 @@ export type VideoNodeData = {
   onGenerate: () => void;
 };
 
-const VideoNode = ({ data, selected }: NodeProps & { data: VideoNodeData }) => {
+type VideoNodeType = Node<VideoNodeData, 'videoNode'>;
+
+const VideoNode = ({ data, selected }: NodeProps<VideoNodeType>) => {
   const { slot } = data;
 
   const statusConfig = {
