@@ -175,15 +175,28 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
               }
             }}
           />
-          <Button
-            size="sm"
-            onClick={generateImage}
-            disabled={!prompt.trim() || isGenerating}
-            className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
-          >
-            {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-            {isGenerating ? "Gerando..." : "Gerar Imagem"}
-          </Button>
+          <div className="flex gap-1.5">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={enhancePrompt}
+              disabled={!prompt.trim() || isEnhancing || isGenerating}
+              className="h-8 px-2.5 text-[10px] gap-1 border-white/20 text-white/70 hover:text-white hover:bg-white/10 bg-transparent"
+              title="Melhorar prompt com IA"
+            >
+              {isEnhancing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+              Melhorar
+            </Button>
+            <Button
+              size="sm"
+              onClick={generateImage}
+              disabled={!prompt.trim() || isGenerating}
+              className="flex-1 h-8 text-xs gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
+            >
+              {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+              {isGenerating ? "Gerando..." : "Gerar Imagem"}
+            </Button>
+          </div>
           <div className="flex-1 overflow-y-auto pb-2">
             {generatedAssets.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-white/40">
