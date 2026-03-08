@@ -35,7 +35,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
       if (data?.error) throw new Error(data.error);
       if (data?.enhancedPrompt) {
         setPrompt(data.enhancedPrompt);
-        toast({ title: "Prompt melhorado com IA ✨" });
+        toast({ title: "Prompt melhorado com IA" });
       }
     } catch (e: any) {
       toast({ title: "Erro ao melhorar prompt", description: e.message, variant: "destructive" });
