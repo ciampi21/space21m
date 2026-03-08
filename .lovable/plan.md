@@ -1,30 +1,22 @@
 
+## Mudar Fundo da Página /tools
 
-## Trocar paleta roxa por azul na página /ai-video
+### O que a imagem 2 mostra
 
-A imagem de referência usa tons de azul (`blue-600` / `#3B82F6` / `hsl(217, 91%, 60%)`). Atualmente, vários elementos usam `violet/fuchsia`. A correção é substituir todos por variações de azul.
+A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
 
-### Arquivos e mudanças
+### O que será alterado
 
-**1. `src/pages/AIVideo.tsx`**
-- Header icon: `from-violet-500 to-fuchsia-500` → `from-blue-600 to-blue-500`
-- Edge strokes `hsl(262, 83%, 58%)` → `hsl(217, 91%, 60%)` (mesmo azul já usado nas edges de imagem)
-- MiniMap promptNode color: `hsl(262, 83%, 58%)` → `hsl(217, 71%, 50%)`
+Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
 
-**2. `src/components/ai-video/AssetSidebar.tsx`**
-- Botão "Gerar Imagem": `from-violet-500 to-fuchsia-500` → `from-blue-600 to-blue-500` (e hover states)
+**Fundo da página:**
+- De: `bg-background` (branco)
+- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
 
-**3. `src/components/ai-video/canvas/PromptNode.tsx`**
-- Header gradient: `from-violet-500/10 to-fuchsia-500/10` → `from-blue-500/10 to-blue-400/10`
-- Icon gradient: `from-violet-500 to-fuchsia-500` → `from-blue-600 to-blue-500`
+### Arquivo a modificar
 
-**4. `src/components/ai-video/canvas/VideoNode.tsx`**
-- Status "generating": `violet-500` → `blue-500` (border, badge, spinner, icon)
-- Botão gerar: `from-violet-600 to-fuchsia-600` → `from-blue-600 to-blue-500` (e hover)
+- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
 
-**5. `src/components/ai-video/VideoSlot.tsx`**
-- Status "generating": `violet-500` → `blue-500` (border, bg, spinner, icon)
-- Botão gerar: `from-violet-600 to-fuchsia-600` → `from-blue-600 to-blue-500` (e hover)
+### Resultado esperado
 
-Todas as mudanças são puramente cosméticas, limitadas à rota `/ai-video` e seus componentes.
-
+A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.

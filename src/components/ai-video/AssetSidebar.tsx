@@ -158,7 +158,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
             size="sm"
             onClick={generateImage}
             disabled={!prompt.trim() || isGenerating}
-            className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600"
+            className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
           >
             {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
             {isGenerating ? "Gerando..." : "Gerar Imagem"}

@@ -23,7 +23,7 @@ const VideoSlot = ({ slot, canGenerate, onGenerate }: VideoSlotProps) => {
         slot.status === "completed"
           ? "border-green-500/30 bg-green-500/5"
           : slot.status === "generating"
-          ? "border-violet-500/30 bg-violet-500/5"
+          ? "border-blue-500/30 bg-blue-500/5"
           : slot.status === "error"
           ? "border-destructive/30 bg-destructive/5"
           : "border-muted-foreground/15 bg-card"
@@ -41,9 +41,9 @@ const VideoSlot = ({ slot, canGenerate, onGenerate }: VideoSlotProps) => {
         {slot.status === "generating" && (
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              <Loader2 className="h-12 w-12 animate-spin text-violet-500" />
+              <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Film className="h-5 w-5 text-violet-500" />
+                <Film className="h-5 w-5 text-blue-500" />
               </div>
             </div>
             <div className="text-center">
@@ -79,7 +79,7 @@ const VideoSlot = ({ slot, canGenerate, onGenerate }: VideoSlotProps) => {
           <Button
             onClick={onGenerate}
             disabled={!canGenerate}
-            className="flex-1 gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white"
+            className="flex-1 gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
           >
             <Play className="h-4 w-4" />
             Gerar Vídeo {slot.id}

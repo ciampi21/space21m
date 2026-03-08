@@ -121,8 +121,8 @@ const AIVideoCanvas = () => {
   const initialEdges: Edge[] = [
     { id: "e-img1-prompt", source: "image-1", target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
     { id: "e-img2-prompt", source: "image-2", target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
-    { id: "e-prompt-vid1", source: "prompt-1", sourceHandle: "video-out", target: "video-1", animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
-    { id: "e-prompt-vid2", source: "prompt-1", sourceHandle: "video-out", target: "video-2", animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
+    { id: "e-prompt-vid1", source: "prompt-1", sourceHandle: "video-out", target: "video-1", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
+    { id: "e-prompt-vid2", source: "prompt-1", sourceHandle: "video-out", target: "video-2", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
   ];
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -272,7 +272,7 @@ const AIVideoCanvas = () => {
     setNodes((nds) => [...nds, newNode]);
     setEdges((eds) => [
       ...eds,
-      { id: `e-prompt-${newId}`, source: "prompt-1", sourceHandle: "video-out", target: newId, animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
+      { id: `e-prompt-${newId}`, source: "prompt-1", sourceHandle: "video-out", target: newId, animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
     ]);
   };
 
@@ -335,7 +335,7 @@ const AIVideoCanvas = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center">
                 <Film className="h-3.5 w-3.5 text-white" />
               </div>
               <span className="text-sm font-bold text-foreground">AI Video Studio</span>
@@ -377,7 +377,7 @@ const AIVideoCanvas = () => {
               className="!bg-card !border-border !rounded-xl !shadow-lg"
               nodeColor={(node) => {
                 if (node.type === "imageNode") return "hsl(217, 91%, 60%)";
-                if (node.type === "promptNode") return "hsl(262, 83%, 58%)";
+                if (node.type === "promptNode") return "hsl(217, 71%, 50%)";
                 if (node.type === "videoNode") return "hsl(142, 76%, 36%)";
                 return "hsl(215, 16%, 47%)";
               }}
