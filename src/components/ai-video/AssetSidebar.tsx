@@ -35,7 +35,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
       if (data?.error) throw new Error(data.error);
       if (data?.enhancedPrompt) {
         setPrompt(data.enhancedPrompt);
-        toast({ title: "Prompt melhorado com IA ✨" });
+        toast({ title: "Prompt melhorado com IA" });
       }
     } catch (e: any) {
       toast({ title: "Erro ao melhorar prompt", description: e.message, variant: "destructive" });
@@ -167,7 +167,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
             placeholder="Descreva a imagem que deseja gerar..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            className="text-xs min-h-[60px] max-h-[100px] resize-none bg-white/10 border-white/20 text-white placeholder:text-white/40"
+            className="text-xs min-h-[120px] resize-y bg-white/10 border-white/20 text-white placeholder:text-white/40"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
