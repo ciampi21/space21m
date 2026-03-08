@@ -335,7 +335,7 @@ const AIVideoCanvas = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center">
                 <Film className="h-3.5 w-3.5 text-white" />
               </div>
               <span className="text-sm font-bold text-foreground">AI Video Studio</span>
