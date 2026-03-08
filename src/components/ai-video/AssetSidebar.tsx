@@ -79,11 +79,11 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 border-r bg-card/80 flex flex-col items-center py-3 gap-2">
-        <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
+      <div className="w-10 shrink-0 border-r border-white/10 bg-login-background flex flex-col items-center py-3 gap-2">
+        <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
           <PanelLeftOpen className="h-4 w-4" />
         </Button>
-        <div className="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
+        <div className="w-6 h-6 rounded bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center">
           <ImageIcon className="h-3 w-3 text-white" />
         </div>
       </div>
