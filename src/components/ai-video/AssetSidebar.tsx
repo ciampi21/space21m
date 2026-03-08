@@ -141,12 +141,38 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           className="group relative aspect-square rounded-lg overflow-hidden border border-border/50 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-primary/40 transition-all bg-muted"
         >
           <img src={asset.url} alt={asset.prompt || "Asset"} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2">
             <GripVertical className="h-5 w-5 text-white opacity-0 group-hover:opacity-80 transition-opacity" />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImage(asset);
+              }}
+              className="p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white opacity-0 group-hover:opacity-100 transition-all"
+              title="Ver imagem"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                downloadImage(asset);
+              }}
+              className="p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white opacity-0 group-hover:opacity-100 transition-all"
+              title="Baixar imagem"
+            >
+              <Download className="h-4 w-4" />
+            </button>
           </div>
           <button
-            onClick={() => removeAsset(asset.id, list)}
-            className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              removeAsset(asset.id, list);
+            }}
+            className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 hover:bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-all"
+            title="Remover"
           >
             <Trash2 className="h-3 w-3" />
           </button>
