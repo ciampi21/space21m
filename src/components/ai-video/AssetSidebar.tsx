@@ -146,7 +146,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
             placeholder="Descreva a imagem que deseja gerar..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            className="text-xs min-h-[60px] max-h-[100px] resize-none"
+            className="text-xs min-h-[60px] max-h-[100px] resize-none bg-white/10 border-white/20 text-white placeholder:text-white/40"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
