@@ -1,28 +1,30 @@
-import { useState, useCallback, useMemo, Suspense, lazy } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Film, Plus, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Film, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
   addEdge,
   useNodesState,
   useEdgesState,
+  useReactFlow,
   type Connection,
   type Edge,
   type Node,
   BackgroundVariant,
-  Panel,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import ImageNode from "@/components/ai-video/canvas/ImageNode";
 import PromptNode from "@/components/ai-video/canvas/PromptNode";
 import VideoNode from "@/components/ai-video/canvas/VideoNode";
+import AssetSidebar from "@/components/ai-video/AssetSidebar";
 
 export interface VideoGeneration {
   id: number;
@@ -44,8 +46,10 @@ const nodeTypes = {
 let imageNodeCounter = 2;
 let videoNodeCounter = 2;
 
-const AIVideo = () => {
+const AIVideoCanvas = () => {
   const navigate = useNavigate();
+  const reactFlowInstance = useReactFlow();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [duration, setDuration] = useState("5");
@@ -192,12 +196,10 @@ const AIVideo = () => {
 
   const startGeneration = async (nodeId: string) => {
     if (!prompt.trim()) return;
-
     setSlots((prev) => ({
       ...prev,
       [nodeId]: { ...(prev[nodeId] || { id: 0 }), status: "generating", error: undefined, videoUrl: undefined },
     }));
-
     try {
       const connectedImageEdges = edges.filter(
         (e) => e.target === "prompt-1" && nodes.find((n) => n.id === e.source && n.type === "imageNode")
@@ -206,75 +208,36 @@ const AIVideo = () => {
       if (connectedImageEdges.length > 0) {
         const firstImageNodeId = connectedImageEdges[0].source;
         const img = images[firstImageNodeId];
-        if (img) {
-          imageUrl = await imageToBase64(img.file);
-        }
+        if (img) imageUrl = await imageToBase64(img.file);
       }
-
       const { data, error } = await supabase.functions.invoke("generate-ai-video", {
         body: { prompt, imageUrl, duration, aspectRatio },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
       setSlots((prev) => ({
         ...prev,
         [nodeId]: { ...prev[nodeId], requestId: data.requestId, statusUrl: data.statusUrl, responseUrl: data.responseUrl },
       }));
-
       pollStatus(nodeId, data.requestId, data.statusUrl);
     } catch (e: any) {
-      setSlots((prev) => ({
-        ...prev,
-        [nodeId]: { ...prev[nodeId], status: "error", error: e.message },
-      }));
+      setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "error", error: e.message } }));
       toast({ title: "Erro ao gerar vídeo", description: e.message, variant: "destructive" });
     }
   };
 
-  // Keep node data in sync with state
   const nodesWithData = useMemo(() => {
     return nodes.map((node) => {
       if (node.type === "imageNode") {
         const img = images[node.id];
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            imagePreview: img?.preview,
-            imageFile: img?.file,
-            onImageChange: handleImageChange,
-          },
-        };
+        return { ...node, data: { ...node.data, imagePreview: img?.preview, imageFile: img?.file, onImageChange: handleImageChange } };
       }
       if (node.type === "promptNode") {
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            prompt,
-            duration,
-            aspectRatio,
-            isEnhancing,
-            onPromptChange: setPrompt,
-            onDurationChange: setDuration,
-            onAspectRatioChange: setAspectRatio,
-            onEnhance: enhancePrompt,
-          },
-        };
+        return { ...node, data: { ...node.data, prompt, duration, aspectRatio, isEnhancing, onPromptChange: setPrompt, onDurationChange: setDuration, onAspectRatioChange: setAspectRatio, onEnhance: enhancePrompt } };
       }
       if (node.type === "videoNode") {
         const slot = slots[node.id] || { id: 0, status: "idle" as const };
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            slot,
-            canGenerate: prompt.trim().length > 0,
-            onGenerate: () => startGeneration(node.id),
-          },
-        };
+        return { ...node, data: { ...node.data, slot, canGenerate: prompt.trim().length > 0, onGenerate: () => startGeneration(node.id) } };
       }
       return node;
     });
@@ -313,14 +276,58 @@ const AIVideo = () => {
     ]);
   };
 
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const raw = e.dataTransfer.getData("application/json");
+      if (!raw) return;
+
+      try {
+        const payload = JSON.parse(raw);
+        if (payload.type !== "sidebar-image" || !payload.url) return;
+
+        const position = reactFlowInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY });
+        imageNodeCounter++;
+        const newId = `image-${imageNodeCounter}`;
+
+        fetch(payload.url)
+          .then((r) => r.blob())
+          .then((blob) => {
+            const file = new File([blob], `generated-${newId}.png`, { type: blob.type || "image/png" });
+            const preview = payload.url.startsWith("data:") ? payload.url : URL.createObjectURL(file);
+            setImages((prev) => ({ ...prev, [newId]: { file, preview } }));
+          });
+
+        const newNode: Node = {
+          id: newId,
+          type: "imageNode",
+          position,
+          data: { label: `Imagem ${imageNodeCounter}`, onImageChange: handleImageChange },
+        };
+        setNodes((nds) => [...nds, newNode]);
+        setEdges((eds) => [
+          ...eds,
+          { id: `e-${newId}-prompt`, source: newId, target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
+        ]);
+      } catch {
+        // ignore invalid drop data
+      }
+    },
+    [reactFlowInstance, setNodes, setEdges, handleImageChange]
+  );
+
   const handleBack = () => {
     if (window.history.state && window.history.state.idx > 0) navigate(-1);
     else navigate("/tools");
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background-outer">
-      {/* Header */}
+    <div className="h-screen w-screen flex flex-col bg-background">
       <header className="border-b bg-card/90 backdrop-blur-sm z-50 shrink-0">
         <div className="px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -336,48 +343,57 @@ const AIVideo = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={addImageNode} className="h-8 text-xs gap-1.5">
-              <Plus className="h-3.5 w-3.5" />
-              Imagem
+              <Plus className="h-3.5 w-3.5" /> Imagem
             </Button>
             <Button variant="outline" size="sm" onClick={addVideoNode} className="h-8 text-xs gap-1.5">
-              <Plus className="h-3.5 w-3.5" />
-              Preview
+              <Plus className="h-3.5 w-3.5" /> Preview
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Canvas */}
-      <div className="flex-1" style={{ width: '100%', height: '100%' }}>
-        <ReactFlow
-          nodes={nodesWithData}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.3 }}
-          defaultEdgeOptions={{ animated: true }}
-          className="bg-background-outer"
-          proOptions={{ hideAttribution: true }}
-        >
-          <Background variant={BackgroundVariant.Dots} gap={20} size={1} className="!bg-background-outer" color="hsl(217, 91%, 60%, 0.15)" />
-          <Controls className="!bg-card !border-border !rounded-xl !shadow-lg" />
-          <MiniMap
-            className="!bg-card !border-border !rounded-xl !shadow-lg"
-            nodeColor={(node) => {
-              if (node.type === "imageNode") return "hsl(217, 91%, 60%)";
-              if (node.type === "promptNode") return "hsl(262, 83%, 58%)";
-              if (node.type === "videoNode") return "hsl(142, 76%, 36%)";
-              return "hsl(215, 16%, 47%)";
-            }}
-            maskColor="hsl(230, 100%, 94%, 0.8)"
-          />
-        </ReactFlow>
+      <div className="flex-1 flex overflow-hidden">
+        <AssetSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((p) => !p)} />
+
+        <div className="flex-1" style={{ width: "100%", height: "100%" }}>
+          <ReactFlow
+            nodes={nodesWithData}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            nodeTypes={nodeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.3 }}
+            defaultEdgeOptions={{ animated: true }}
+            className="bg-background"
+            proOptions={{ hideAttribution: true }}
+          >
+            <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(217, 91%, 60%, 0.15)" />
+            <Controls className="!bg-card !border-border !rounded-xl !shadow-lg" />
+            <MiniMap
+              className="!bg-card !border-border !rounded-xl !shadow-lg"
+              nodeColor={(node) => {
+                if (node.type === "imageNode") return "hsl(217, 91%, 60%)";
+                if (node.type === "promptNode") return "hsl(262, 83%, 58%)";
+                if (node.type === "videoNode") return "hsl(142, 76%, 36%)";
+                return "hsl(215, 16%, 47%)";
+              }}
+              maskColor="hsl(230, 100%, 94%, 0.8)"
+            />
+          </ReactFlow>
+        </div>
       </div>
     </div>
   );
 };
+
+const AIVideo = () => (
+  <ReactFlowProvider>
+    <AIVideoCanvas />
+  </ReactFlowProvider>
+);
 
 export default AIVideo;
