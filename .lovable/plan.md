@@ -1,22 +1,23 @@
 
-## Mudar Fundo da Página /tools
 
-### O que a imagem 2 mostra
+## Fix /ai-video page to match app aesthetic (image 2 reference)
 
-A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
+The reference (21M Finances) has: **dark navy sidebar**, **light blue/lavender canvas background** (`--background-outer: hsl(230, 100%, 94%)`), and **white cards**. Currently the /ai-video page is all white/light gray.
 
-### O que será alterado
+### Changes
 
-Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
+**1. `src/pages/AIVideo.tsx`**
+- Canvas area: change `bg-background` to use the light blue outer background (`bg-[hsl(230,100%,94%)]` or use the CSS var `--background-outer`)
+- Header: keep white (`bg-card`) — already matches
+- ReactFlow `className`: use the light blue background instead of white
 
-**Fundo da página:**
-- De: `bg-background` (branco)
-- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
+**2. `src/components/ai-video/AssetSidebar.tsx`**
+- Main sidebar: dark navy background (`bg-[hsl(219,61%,26%)]`) with white text — matching the reference dark sidebar
+- Collapsed sidebar: same dark navy
+- Tabs, inputs, buttons: adapt text/border colors for dark background (white/light text, subtle borders)
+- Asset grid items: keep light card backgrounds for contrast
 
-### Arquivo a modificar
+**3. Node components stay the same** — they're already white cards which will look correct against the light blue canvas background.
 
-- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
+All changes scoped to `/ai-video` page components only. Uses existing CSS variables (`--background-outer`, `--login-background`) already defined in the design system.
 
-### Resultado esperado
-
-A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.
