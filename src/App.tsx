@@ -16,6 +16,7 @@ import SetupAccount from "./pages/SetupAccount";
 import AcceptInvite from "./pages/AcceptInvite";
 import ThankYou from "./pages/ThankYou";
 import Tools from "./pages/Tools";
+import AIVideo from "./pages/AIVideo";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/workspace/:id" element={<Workspace />} />
               <Route path="/tools" element={<Tools />} />
+              <Route path="/ai-video" element={<AIVideo />} />
               <Route path="/thank-you" element={<ThankYou />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Image, Music, Video, Headphones, FileKey } from "lucide-react";
+import { ArrowLeft, Image, Music, Video, Headphones, FileKey, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ToolCard from "@/components/tools/ToolCard";
 import ToolModal from "@/components/tools/ToolModal";
@@ -10,7 +10,7 @@ import VideoConverter from "@/components/tools/VideoConverter";
 import AudioConverter from "@/components/tools/AudioConverter";
 import PdfTool from "@/components/tools/PdfTool";
 
-type ToolType = "image" | "youtube" | "video" | "audio" | "pdf" | null;
+type ToolType = "image" | "youtube" | "video" | "audio" | "pdf" | "ai-video" | null;
 
 const tools = [
   {
@@ -39,6 +39,15 @@ const tools = [
     iconBgColor: "hsl(262 83% 95%)",
     iconColor: "hsl(262 83% 58%)",
     status: "active" as const,
+  },
+  {
+    id: "ai-video" as const,
+    title: "Criar Vídeo com IA",
+    description: "Gere vídeos com IA a partir de imagens e prompts",
+    icon: Film,
+    iconBgColor: "hsl(270 95% 95%)",
+    iconColor: "hsl(270 95% 55%)",
+    status: "new" as const,
   },
   {
     id: "audio" as const,
@@ -73,8 +82,12 @@ const Tools = () => {
   };
 
   const handleToolClick = (toolId: ToolType) => {
+    if (toolId === "ai-video") {
+      navigate("/ai-video");
+      return;
+    }
     const tool = tools.find((t) => t.id === toolId);
-    if (tool?.status === "active") {
+    if (tool?.status === "active" || tool?.status === "new") {
       setActiveTool(toolId);
     }
   };
