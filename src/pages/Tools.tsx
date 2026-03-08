@@ -10,7 +10,7 @@ import VideoConverter from "@/components/tools/VideoConverter";
 import AudioConverter from "@/components/tools/AudioConverter";
 import PdfTool from "@/components/tools/PdfTool";
 
-type ToolType = "image" | "youtube" | "video" | "audio" | "pdf" | null;
+type ToolType = "image" | "youtube" | "video" | "audio" | "pdf" | "ai-video" | null;
 
 const tools = [
   {
