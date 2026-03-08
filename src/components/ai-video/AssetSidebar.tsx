@@ -196,7 +196,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           />
           <div className="flex-1 overflow-y-auto pb-2">
             {uploadedAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center h-32 text-white/40">
                 <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
                 <span className="text-[11px]">Uploads aparecerão aqui</span>
               </div>

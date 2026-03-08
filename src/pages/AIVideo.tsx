@@ -368,7 +368,7 @@ const AIVideoCanvas = () => {
             fitView
             fitViewOptions={{ padding: 0.3 }}
             defaultEdgeOptions={{ animated: true }}
-            className="bg-background"
+            className="bg-background-outer"
             proOptions={{ hideAttribution: true }}
           >
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(217, 91%, 60%, 0.15)" />
