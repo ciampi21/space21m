@@ -24,6 +24,10 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [generatedAssets, setGeneratedAssets] = useState<SidebarAsset[]>([]);
+  const [uploadedAssets, setUploadedAssets] = useState<SidebarAsset[]>([]);
+  const [selectedImage, setSelectedImage] = useState<SidebarAsset | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const enhancePrompt = useCallback(async () => {
     if (!prompt.trim() || isEnhancing) return;
@@ -44,9 +48,24 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
       setIsEnhancing(false);
     }
   }, [prompt, isEnhancing]);
-  const [generatedAssets, setGeneratedAssets] = useState<SidebarAsset[]>([]);
-  const [uploadedAssets, setUploadedAssets] = useState<SidebarAsset[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const downloadImage = useCallback(async (asset: SidebarAsset) => {
+    try {
+      const response = await fetch(asset.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `generated-image-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast({ title: "Imagem baixada com sucesso!" });
+    } catch (error) {
+      toast({ title: "Erro ao baixar imagem", variant: "destructive" });
+    }
+  }, []);
 
   const generateImage = useCallback(async () => {
     if (!prompt.trim() || isGenerating) return;
