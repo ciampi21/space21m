@@ -82,8 +82,12 @@ const Tools = () => {
   };
 
   const handleToolClick = (toolId: ToolType) => {
+    if (toolId === "ai-video") {
+      navigate("/ai-video");
+      return;
+    }
     const tool = tools.find((t) => t.id === toolId);
-    if (tool?.status === "active") {
+    if (tool?.status === "active" || tool?.status === "new") {
       setActiveTool(toolId);
     }
   };

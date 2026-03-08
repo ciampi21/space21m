@@ -38,6 +38,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/workspace/:id" element={<Workspace />} />
               <Route path="/tools" element={<Tools />} />
+              <Route path="/ai-video" element={<AIVideo />} />
               <Route path="/thank-you" element={<ThankYou />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
