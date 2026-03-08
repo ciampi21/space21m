@@ -41,6 +41,15 @@ const tools = [
     status: "active" as const,
   },
   {
+    id: "ai-video" as const,
+    title: "Criar Vídeo com IA",
+    description: "Gere vídeos com IA a partir de imagens e prompts",
+    icon: Film,
+    iconBgColor: "hsl(270 95% 95%)",
+    iconColor: "hsl(270 95% 55%)",
+    status: "new" as const,
+  },
+  {
     id: "audio" as const,
     title: "Conversor de Áudio",
     description: "Converta entre MP3, WAV, AAC, OGG",
