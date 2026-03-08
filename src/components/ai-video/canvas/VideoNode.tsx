@@ -67,8 +67,8 @@ const VideoNode = ({ data, selected }: NodeProps<VideoNodeType>) => {
         {slot.status === "generating" && (
           <div className="flex flex-col items-center gap-2">
             <div className="relative">
-              <Loader2 className="h-10 w-10 animate-spin text-violet-500" />
-              <Film className="h-4 w-4 text-violet-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+              <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+              <Film className="h-4 w-4 text-blue-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
             <p className="text-[10px] text-muted-foreground">1-3 minutos...</p>
           </div>
