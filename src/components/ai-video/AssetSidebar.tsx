@@ -131,11 +131,11 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
 
       {/* Tabs */}
       <Tabs defaultValue="generate" className="flex-1 flex flex-col overflow-hidden">
-        <TabsList className="mx-2 mt-2 grid grid-cols-2 h-8">
-          <TabsTrigger value="generate" className="text-[11px] gap-1">
+        <TabsList className="mx-2 mt-2 grid grid-cols-2 h-8 bg-white/10">
+          <TabsTrigger value="generate" className="text-[11px] gap-1 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white">
             <Sparkles className="h-3 w-3" /> Gerar
           </TabsTrigger>
-          <TabsTrigger value="upload" className="text-[11px] gap-1">
+          <TabsTrigger value="upload" className="text-[11px] gap-1 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white">
             <Upload className="h-3 w-3" /> Upload
           </TabsTrigger>
         </TabsList>
