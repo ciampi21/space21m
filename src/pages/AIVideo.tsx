@@ -133,6 +133,106 @@ const AIVideo = () => {
     [setEdges]
   );
 
+  const enhancePrompt = async () => {
+    if (!prompt.trim()) return;
+    setIsEnhancing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("enhance-video-prompt", {
+        body: { prompt, imageCount: Object.keys(images).length },
+      });
+      if (error) throw error;
+      if (data?.enhancedPrompt) {
+        setPrompt(data.enhancedPrompt);
+        toast({ title: "Prompt melhorado com IA! ✨" });
+      }
+    } catch (e: any) {
+      toast({ title: "Erro ao melhorar prompt", description: e.message, variant: "destructive" });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  const imageToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const pollStatus = async (nodeId: string, requestId: string, statusUrl: string) => {
+    let attempts = 0;
+    const poll = async () => {
+      attempts++;
+      if (attempts > 120) {
+        setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "error", error: "Timeout" } }));
+        return;
+      }
+      try {
+        const { data, error } = await supabase.functions.invoke("check-video-status", {
+          body: { requestId, statusUrl },
+        });
+        if (error) throw error;
+        if (data?.status === "COMPLETED" && data?.videoUrl) {
+          setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "completed", videoUrl: data.videoUrl } }));
+          toast({ title: `Vídeo gerado com sucesso! 🎬` });
+          return;
+        }
+        if (data?.status === "FAILED") {
+          setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "error", error: "Geração falhou" } }));
+          return;
+        }
+        setTimeout(poll, 5000);
+      } catch {
+        setTimeout(poll, 5000);
+      }
+    };
+    setTimeout(poll, 5000);
+  };
+
+  const startGeneration = async (nodeId: string) => {
+    if (!prompt.trim()) return;
+
+    setSlots((prev) => ({
+      ...prev,
+      [nodeId]: { ...(prev[nodeId] || { id: 0 }), status: "generating", error: undefined, videoUrl: undefined },
+    }));
+
+    try {
+      const connectedImageEdges = edges.filter(
+        (e) => e.target === "prompt-1" && nodes.find((n) => n.id === e.source && n.type === "imageNode")
+      );
+      let imageUrl: string | undefined;
+      if (connectedImageEdges.length > 0) {
+        const firstImageNodeId = connectedImageEdges[0].source;
+        const img = images[firstImageNodeId];
+        if (img) {
+          imageUrl = await imageToBase64(img.file);
+        }
+      }
+
+      const { data, error } = await supabase.functions.invoke("generate-ai-video", {
+        body: { prompt, imageUrl, duration, aspectRatio },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setSlots((prev) => ({
+        ...prev,
+        [nodeId]: { ...prev[nodeId], requestId: data.requestId, statusUrl: data.statusUrl, responseUrl: data.responseUrl },
+      }));
+
+      pollStatus(nodeId, data.requestId, data.statusUrl);
+    } catch (e: any) {
+      setSlots((prev) => ({
+        ...prev,
+        [nodeId]: { ...prev[nodeId], status: "error", error: e.message },
+      }));
+      toast({ title: "Erro ao gerar vídeo", description: e.message, variant: "destructive" });
+    }
+  };
+
   // Keep node data in sync with state
   const nodesWithData = useMemo(() => {
     return nodes.map((node) => {
@@ -179,107 +279,6 @@ const AIVideo = () => {
       return node;
     });
   }, [nodes, images, prompt, duration, aspectRatio, isEnhancing, slots, handleImageChange]);
-
-  const enhancePrompt = async () => {
-    if (!prompt.trim()) return;
-    setIsEnhancing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("enhance-video-prompt", {
-        body: { prompt, imageCount: Object.keys(images).length },
-      });
-      if (error) throw error;
-      if (data?.enhancedPrompt) {
-        setPrompt(data.enhancedPrompt);
-        toast({ title: "Prompt melhorado com IA! ✨" });
-      }
-    } catch (e: any) {
-      toast({ title: "Erro ao melhorar prompt", description: e.message, variant: "destructive" });
-    } finally {
-      setIsEnhancing(false);
-    }
-  };
-
-  const imageToBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-  const startGeneration = async (nodeId: string) => {
-    if (!prompt.trim()) return;
-
-    setSlots((prev) => ({
-      ...prev,
-      [nodeId]: { ...(prev[nodeId] || { id: 0 }), status: "generating", error: undefined, videoUrl: undefined },
-    }));
-
-    try {
-      // Find connected image nodes
-      const connectedImageEdges = edges.filter(
-        (e) => e.target === "prompt-1" && nodes.find((n) => n.id === e.source && n.type === "imageNode")
-      );
-      let imageUrl: string | undefined;
-      if (connectedImageEdges.length > 0) {
-        const firstImageNodeId = connectedImageEdges[0].source;
-        const img = images[firstImageNodeId];
-        if (img) {
-          imageUrl = await imageToBase64(img.file);
-        }
-      }
-
-      const { data, error } = await supabase.functions.invoke("generate-ai-video", {
-        body: { prompt, imageUrl, duration, aspectRatio },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      setSlots((prev) => ({
-        ...prev,
-        [nodeId]: { ...prev[nodeId], requestId: data.requestId, statusUrl: data.statusUrl, responseUrl: data.responseUrl },
-      }));
-
-      pollStatus(nodeId, data.requestId, data.statusUrl);
-    } catch (e: any) {
-      setSlots((prev) => ({
-        ...prev,
-        [nodeId]: { ...prev[nodeId], status: "error", error: e.message },
-      }));
-      toast({ title: "Erro ao gerar vídeo", description: e.message, variant: "destructive" });
-    }
-  };
-
-  const pollStatus = async (nodeId: string, requestId: string, statusUrl: string) => {
-    let attempts = 0;
-    const poll = async () => {
-      attempts++;
-      if (attempts > 120) {
-        setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "error", error: "Timeout" } }));
-        return;
-      }
-      try {
-        const { data, error } = await supabase.functions.invoke("check-video-status", {
-          body: { requestId, statusUrl },
-        });
-        if (error) throw error;
-        if (data?.status === "COMPLETED" && data?.videoUrl) {
-          setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "completed", videoUrl: data.videoUrl } }));
-          toast({ title: `Vídeo gerado com sucesso! 🎬` });
-          return;
-        }
-        if (data?.status === "FAILED") {
-          setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "error", error: "Geração falhou" } }));
-          return;
-        }
-        setTimeout(poll, 5000);
-      } catch {
-        setTimeout(poll, 5000);
-      }
-    };
-    setTimeout(poll, 5000);
-  };
 
   const addImageNode = () => {
     imageNodeCounter++;
