@@ -1,44 +1,22 @@
 
+## Mudar Fundo da Página /tools
 
-## Diagnóstico Real (confirmado via browser)
+### O que a imagem 2 mostra
 
-Naveguei até `/ai-video` no browser e confirmei a tela branca. O console revela a **causa raiz real**:
+A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
 
-```
-[network] Failed to load resource: the server responded with a status of 504 ()
-(@xyflow_react.js?v=d0d64865)
-```
+### O que será alterado
 
-O pacote `@xyflow/react` **não está sendo carregado** — retorna um erro 504 (timeout) do servidor de desenvolvimento Vite. Sem essa dependência, o componente `ReactFlow` não existe, e a página inteira fica em branco.
+Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
 
-**O plano anterior (ajustar CSS do container) NÃO corrigiria o problema.** A causa não é CSS nem tipagem — é que a dependência simplesmente não carrega.
+**Fundo da página:**
+- De: `bg-background` (branco)
+- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
 
----
+### Arquivo a modificar
 
-## Plano de Correção
+- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
 
-### 1. Forçar pre-bundling do `@xyflow/react` no Vite
+### Resultado esperado
 
-**Arquivo: `vite.config.ts`**
-
-Adicionar `optimizeDeps.include` com `@xyflow/react` para que o Vite faça o pre-bundling explicitamente, evitando o timeout 504:
-
-```ts
-optimizeDeps: {
-  include: ['@xyflow/react'],
-},
-```
-
-### 2. Adicionar fallback de carregamento na página
-
-**Arquivo: `src/pages/AIVideo.tsx`**
-
-Usar `React.lazy` + `Suspense` para importar o ReactFlow, com um loading state visível caso a dependência demore. Isso evita a tela completamente branca mesmo se houver atraso no carregamento.
-
-### Por que tenho certeza
-
-- O erro 504 no console é **inequívoco** — a biblioteca não está carregando
-- `optimizeDeps.include` é a solução documentada do Vite para dependências pesadas que falham no pre-bundling
-- O fallback com Suspense é uma camada de segurança adicional, não a correção principal
-- Nenhuma dessas mudanças afeta outros componentes ou páginas
-
+A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.
