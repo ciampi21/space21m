@@ -181,10 +181,10 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
             onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleUpload(e.dataTransfer.files); }}
             onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 h-20 cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-all"
+            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 h-20 cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all"
           >
-            <Upload className="h-5 w-5 text-muted-foreground/60 mb-1" />
-            <span className="text-[10px] text-muted-foreground font-medium">Arraste ou clique para enviar</span>
+            <Upload className="h-5 w-5 text-white/40 mb-1" />
+            <span className="text-[10px] text-white/50 font-medium">Arraste ou clique para enviar</span>
           </div>
           <input
             ref={fileInputRef}
