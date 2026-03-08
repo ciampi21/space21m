@@ -115,7 +115,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
   );
 
   return (
-    <div className="w-72 shrink-0 border-r border-white/10 backdrop-blur-sm flex flex-col overflow-hidden text-white" style={{ backgroundColor: 'hsl(var(--login-background))' }}>
+    <div className="w-72 shrink-0 border-r border-white/10 backdrop-blur-sm flex flex-col overflow-hidden text-white" style={{ backgroundColor: 'hsl(222, 47%, 11%)' }}>
       {/* Header */}
       <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2">
