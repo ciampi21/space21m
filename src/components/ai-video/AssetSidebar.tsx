@@ -115,16 +115,16 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
   );
 
   return (
-    <div className="w-72 shrink-0 border-r bg-card/90 backdrop-blur-sm flex flex-col overflow-hidden">
+    <div className="w-72 shrink-0 border-r border-white/10 bg-login-background backdrop-blur-sm flex flex-col overflow-hidden text-white">
       {/* Header */}
-      <div className="px-3 py-2 border-b flex items-center justify-between">
+      <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center">
             <ImageIcon className="h-3.5 w-3.5 text-white" />
           </div>
-          <span className="text-xs font-bold text-foreground">Assets</span>
+          <span className="text-xs font-bold text-white">Assets</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={onToggle} className="h-7 w-7">
+        <Button variant="ghost" size="icon" onClick={onToggle} className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10">
           <PanelLeftClose className="h-3.5 w-3.5" />
         </Button>
       </div>
