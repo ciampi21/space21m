@@ -11,7 +11,9 @@ export type ImageNodeData = {
   onImageChange: (nodeId: string, file: File | null) => void;
 };
 
-const ImageNode = ({ id, data, selected }: NodeProps & { data: ImageNodeData }) => {
+type ImageNodeType = Node<ImageNodeData, 'imageNode'>;
+
+const ImageNode = ({ id, data, selected }: NodeProps<ImageNodeType>) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(
