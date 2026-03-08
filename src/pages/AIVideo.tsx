@@ -327,7 +327,7 @@ const AIVideoCanvas = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background">
+    <div className="h-screen w-screen flex flex-col bg-background-outer">
       <header className="border-b bg-card/90 backdrop-blur-sm z-50 shrink-0">
         <div className="px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -368,7 +368,7 @@ const AIVideoCanvas = () => {
             fitView
             fitViewOptions={{ padding: 0.3 }}
             defaultEdgeOptions={{ animated: true }}
-            className="bg-background"
+            className="bg-background-outer"
             proOptions={{ hideAttribution: true }}
           >
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(217, 91%, 60%, 0.15)" />

@@ -79,11 +79,11 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 border-r bg-card/80 flex flex-col items-center py-3 gap-2">
-        <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
+      <div className="w-10 shrink-0 border-r border-white/10 flex flex-col items-center py-3 gap-2" style={{ backgroundColor: 'hsl(var(--login-background))' }}>
+        <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
           <PanelLeftOpen className="h-4 w-4" />
         </Button>
-        <div className="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
+        <div className="w-6 h-6 rounded bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center">
           <ImageIcon className="h-3 w-3 text-white" />
         </div>
       </div>
@@ -115,27 +115,27 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
   );
 
   return (
-    <div className="w-72 shrink-0 border-r bg-card/90 backdrop-blur-sm flex flex-col overflow-hidden">
+    <div className="w-72 shrink-0 border-r border-white/10 backdrop-blur-sm flex flex-col overflow-hidden text-white" style={{ backgroundColor: 'hsl(var(--login-background))' }}>
       {/* Header */}
-      <div className="px-3 py-2 border-b flex items-center justify-between">
+      <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center">
             <ImageIcon className="h-3.5 w-3.5 text-white" />
           </div>
-          <span className="text-xs font-bold text-foreground">Assets</span>
+          <span className="text-xs font-bold text-white">Assets</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={onToggle} className="h-7 w-7">
+        <Button variant="ghost" size="icon" onClick={onToggle} className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10">
           <PanelLeftClose className="h-3.5 w-3.5" />
         </Button>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="generate" className="flex-1 flex flex-col overflow-hidden">
-        <TabsList className="mx-2 mt-2 grid grid-cols-2 h-8">
-          <TabsTrigger value="generate" className="text-[11px] gap-1">
+        <TabsList className="mx-2 mt-2 grid grid-cols-2 h-8 bg-white/10">
+          <TabsTrigger value="generate" className="text-[11px] gap-1 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white">
             <Sparkles className="h-3 w-3" /> Gerar
           </TabsTrigger>
-          <TabsTrigger value="upload" className="text-[11px] gap-1">
+          <TabsTrigger value="upload" className="text-[11px] gap-1 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white">
             <Upload className="h-3 w-3" /> Upload
           </TabsTrigger>
         </TabsList>
@@ -146,7 +146,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
             placeholder="Descreva a imagem que deseja gerar..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            className="text-xs min-h-[60px] max-h-[100px] resize-none"
+            className="text-xs min-h-[60px] max-h-[100px] resize-none bg-white/10 border-white/20 text-white placeholder:text-white/40"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -165,7 +165,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           </Button>
           <div className="flex-1 overflow-y-auto pb-2">
             {generatedAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center h-32 text-white/40">
                 <Sparkles className="h-8 w-8 mb-2 opacity-30" />
                 <span className="text-[11px]">Imagens geradas aparecerão aqui</span>
               </div>
@@ -181,10 +181,10 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
             onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleUpload(e.dataTransfer.files); }}
             onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 h-20 cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-all"
+            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 h-20 cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all"
           >
-            <Upload className="h-5 w-5 text-muted-foreground/60 mb-1" />
-            <span className="text-[10px] text-muted-foreground font-medium">Arraste ou clique para enviar</span>
+            <Upload className="h-5 w-5 text-white/40 mb-1" />
+            <span className="text-[10px] text-white/50 font-medium">Arraste ou clique para enviar</span>
           </div>
           <input
             ref={fileInputRef}
@@ -196,7 +196,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           />
           <div className="flex-1 overflow-y-auto pb-2">
             {uploadedAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center h-32 text-white/40">
                 <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
                 <span className="text-[11px]">Uploads aparecerão aqui</span>
               </div>
