@@ -1,14 +1,28 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles, Play, Download, Loader2, Upload, X, Film, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Film, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import VideoSlot from "@/components/ai-video/VideoSlot";
-import ImageUploadZone from "@/components/ai-video/ImageUploadZone";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MiniMap,
+  addEdge,
+  useNodesState,
+  useEdgesState,
+  type Connection,
+  type Edge,
+  type Node,
+  BackgroundVariant,
+  Panel,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+
+import ImageNode from "@/components/ai-video/canvas/ImageNode";
+import PromptNode from "@/components/ai-video/canvas/PromptNode";
+import VideoNode from "@/components/ai-video/canvas/VideoNode";
 
 export interface VideoGeneration {
   id: number;
@@ -21,51 +35,157 @@ export interface VideoGeneration {
   progress?: number;
 }
 
+const nodeTypes = {
+  imageNode: ImageNode,
+  promptNode: PromptNode,
+  videoNode: VideoNode,
+};
+
+let imageNodeCounter = 2;
+let videoNodeCounter = 2;
+
 const AIVideo = () => {
   const navigate = useNavigate();
-  const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
   const [prompt, setPrompt] = useState("");
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [duration, setDuration] = useState("5");
   const [aspectRatio, setAspectRatio] = useState("16:9");
-  const [slots, setSlots] = useState<VideoGeneration[]>([
-    { id: 1, status: "idle" },
-    { id: 2, status: "idle" },
-  ]);
+  const [images, setImages] = useState<Record<string, { file: File; preview: string }>>({});
+  const [slots, setSlots] = useState<Record<string, VideoGeneration>>({
+    "video-1": { id: 1, status: "idle" },
+    "video-2": { id: 2, status: "idle" },
+  });
 
-  const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
+  const handleImageChange = useCallback((nodeId: string, file: File | null) => {
+    if (file) {
+      const preview = URL.createObjectURL(file);
+      setImages((prev) => ({ ...prev, [nodeId]: { file, preview } }));
     } else {
-      navigate("/tools");
+      setImages((prev) => {
+        const copy = { ...prev };
+        if (copy[nodeId]) {
+          URL.revokeObjectURL(copy[nodeId].preview);
+          delete copy[nodeId];
+        }
+        return copy;
+      });
     }
-  };
-
-  const handleImageAdd = useCallback((file: File) => {
-    if (images.length >= 2) {
-      toast({ title: "Máximo de 2 imagens", variant: "destructive" });
-      return;
-    }
-    const preview = URL.createObjectURL(file);
-    setImages((prev) => [...prev, { file, preview }]);
-  }, [images.length]);
-
-  const handleImageRemove = useCallback((index: number) => {
-    setImages((prev) => {
-      URL.revokeObjectURL(prev[index].preview);
-      return prev.filter((_, i) => i !== index);
-    });
   }, []);
 
+  const initialNodes: Node[] = [
+    {
+      id: "image-1",
+      type: "imageNode",
+      position: { x: 50, y: 100 },
+      data: { label: "Imagem 1", onImageChange: handleImageChange },
+    },
+    {
+      id: "image-2",
+      type: "imageNode",
+      position: { x: 50, y: 380 },
+      data: { label: "Imagem 2", onImageChange: handleImageChange },
+    },
+    {
+      id: "prompt-1",
+      type: "promptNode",
+      position: { x: 370, y: 120 },
+      data: {
+        prompt: "",
+        duration: "5",
+        aspectRatio: "16:9",
+        isEnhancing: false,
+        onPromptChange: () => {},
+        onDurationChange: () => {},
+        onAspectRatioChange: () => {},
+        onEnhance: () => {},
+      },
+    },
+    {
+      id: "video-1",
+      type: "videoNode",
+      position: { x: 790, y: 80 },
+      data: { label: "Preview", slot: { id: 1, status: "idle" }, canGenerate: false, onGenerate: () => {} },
+    },
+    {
+      id: "video-2",
+      type: "videoNode",
+      position: { x: 790, y: 380 },
+      data: { label: "Preview 2", slot: { id: 2, status: "idle" }, canGenerate: false, onGenerate: () => {} },
+    },
+  ];
+
+  const initialEdges: Edge[] = [
+    { id: "e-img1-prompt", source: "image-1", target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
+    { id: "e-img2-prompt", source: "image-2", target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
+    { id: "e-prompt-vid1", source: "prompt-1", sourceHandle: "video-out", target: "video-1", animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
+    { id: "e-prompt-vid2", source: "prompt-1", sourceHandle: "video-out", target: "video-2", animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
+  ];
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      setEdges((eds) =>
+        addEdge({ ...connection, animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } }, eds)
+      );
+    },
+    [setEdges]
+  );
+
+  // Keep node data in sync with state
+  const nodesWithData = useMemo(() => {
+    return nodes.map((node) => {
+      if (node.type === "imageNode") {
+        const img = images[node.id];
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            imagePreview: img?.preview,
+            imageFile: img?.file,
+            onImageChange: handleImageChange,
+          },
+        };
+      }
+      if (node.type === "promptNode") {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            prompt,
+            duration,
+            aspectRatio,
+            isEnhancing,
+            onPromptChange: setPrompt,
+            onDurationChange: setDuration,
+            onAspectRatioChange: setAspectRatio,
+            onEnhance: enhancePrompt,
+          },
+        };
+      }
+      if (node.type === "videoNode") {
+        const slot = slots[node.id] || { id: 0, status: "idle" as const };
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            slot,
+            canGenerate: prompt.trim().length > 0,
+            onGenerate: () => startGeneration(node.id),
+          },
+        };
+      }
+      return node;
+    });
+  }, [nodes, images, prompt, duration, aspectRatio, isEnhancing, slots, handleImageChange]);
+
   const enhancePrompt = async () => {
-    if (!prompt.trim()) {
-      toast({ title: "Digite um prompt primeiro", variant: "destructive" });
-      return;
-    }
+    if (!prompt.trim()) return;
     setIsEnhancing(true);
     try {
       const { data, error } = await supabase.functions.invoke("enhance-video-prompt", {
-        body: { prompt, imageCount: images.length },
+        body: { prompt, imageCount: Object.keys(images).length },
       });
       if (error) throw error;
       if (data?.enhancedPrompt) {
@@ -73,36 +193,40 @@ const AIVideo = () => {
         toast({ title: "Prompt melhorado com IA! ✨" });
       }
     } catch (e: any) {
-      console.error("Enhance error:", e);
       toast({ title: "Erro ao melhorar prompt", description: e.message, variant: "destructive" });
     } finally {
       setIsEnhancing(false);
     }
   };
 
-  const imageToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  const imageToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  };
 
-  const startGeneration = async (slotId: number) => {
-    if (!prompt.trim()) {
-      toast({ title: "Digite um prompt", variant: "destructive" });
-      return;
-    }
+  const startGeneration = async (nodeId: string) => {
+    if (!prompt.trim()) return;
 
-    setSlots((prev) =>
-      prev.map((s) => (s.id === slotId ? { ...s, status: "generating" as const, error: undefined, videoUrl: undefined } : s))
-    );
+    setSlots((prev) => ({
+      ...prev,
+      [nodeId]: { ...(prev[nodeId] || { id: 0 }), status: "generating", error: undefined, videoUrl: undefined },
+    }));
 
     try {
+      // Find connected image nodes
+      const connectedImageEdges = edges.filter(
+        (e) => e.target === "prompt-1" && nodes.find((n) => n.id === e.source && n.type === "imageNode")
+      );
       let imageUrl: string | undefined;
-      if (images.length > 0) {
-        imageUrl = await imageToBase64(images[0].file);
+      if (connectedImageEdges.length > 0) {
+        const firstImageNodeId = connectedImageEdges[0].source;
+        const img = images[firstImageNodeId];
+        if (img) {
+          imageUrl = await imageToBase64(img.file);
+        }
       }
 
       const { data, error } = await supabase.functions.invoke("generate-ai-video", {
@@ -112,225 +236,146 @@ const AIVideo = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      setSlots((prev) =>
-        prev.map((s) =>
-          s.id === slotId
-            ? { ...s, requestId: data.requestId, statusUrl: data.statusUrl, responseUrl: data.responseUrl }
-            : s
-        )
-      );
+      setSlots((prev) => ({
+        ...prev,
+        [nodeId]: { ...prev[nodeId], requestId: data.requestId, statusUrl: data.statusUrl, responseUrl: data.responseUrl },
+      }));
 
-      // Start polling
-      pollStatus(slotId, data.requestId, data.statusUrl);
+      pollStatus(nodeId, data.requestId, data.statusUrl);
     } catch (e: any) {
-      console.error("Generation error:", e);
-      setSlots((prev) =>
-        prev.map((s) => (s.id === slotId ? { ...s, status: "error" as const, error: e.message } : s))
-      );
+      setSlots((prev) => ({
+        ...prev,
+        [nodeId]: { ...prev[nodeId], status: "error", error: e.message },
+      }));
       toast({ title: "Erro ao gerar vídeo", description: e.message, variant: "destructive" });
     }
   };
 
-  const pollStatus = async (slotId: number, requestId: string, statusUrl: string) => {
-    const maxAttempts = 120; // 10 minutes with 5s intervals
+  const pollStatus = async (nodeId: string, requestId: string, statusUrl: string) => {
     let attempts = 0;
-
     const poll = async () => {
       attempts++;
-      if (attempts > maxAttempts) {
-        setSlots((prev) =>
-          prev.map((s) => (s.id === slotId ? { ...s, status: "error" as const, error: "Timeout: geração demorou muito" } : s))
-        );
+      if (attempts > 120) {
+        setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "error", error: "Timeout" } }));
         return;
       }
-
       try {
         const { data, error } = await supabase.functions.invoke("check-video-status", {
           body: { requestId, statusUrl },
         });
-
         if (error) throw error;
-
         if (data?.status === "COMPLETED" && data?.videoUrl) {
-          setSlots((prev) =>
-            prev.map((s) => (s.id === slotId ? { ...s, status: "completed" as const, videoUrl: data.videoUrl } : s))
-          );
-          toast({ title: `Vídeo ${slotId} gerado com sucesso! 🎬` });
+          setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "completed", videoUrl: data.videoUrl } }));
+          toast({ title: `Vídeo gerado com sucesso! 🎬` });
           return;
         }
-
         if (data?.status === "FAILED") {
-          setSlots((prev) =>
-            prev.map((s) => (s.id === slotId ? { ...s, status: "error" as const, error: "Geração falhou no servidor" } : s))
-          );
+          setSlots((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], status: "error", error: "Geração falhou" } }));
           return;
         }
-
-        // Still in progress
         setTimeout(poll, 5000);
-      } catch (e: any) {
-        console.error("Poll error:", e);
+      } catch {
         setTimeout(poll, 5000);
       }
     };
-
     setTimeout(poll, 5000);
   };
 
-  const canGenerate = prompt.trim().length > 0;
-  const generatingCount = slots.filter((s) => s.status === "generating").length;
+  const addImageNode = () => {
+    imageNodeCounter++;
+    const newId = `image-${imageNodeCounter}`;
+    const newNode: Node = {
+      id: newId,
+      type: "imageNode",
+      position: { x: 50, y: 100 + (imageNodeCounter - 1) * 280 },
+      data: { label: `Imagem ${imageNodeCounter}`, onImageChange: handleImageChange },
+    };
+    setNodes((nds) => [...nds, newNode]);
+    setEdges((eds) => [
+      ...eds,
+      { id: `e-${newId}-prompt`, source: newId, target: "prompt-1", targetHandle: "image-in", animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
+    ]);
+  };
+
+  const addVideoNode = () => {
+    videoNodeCounter++;
+    const newId = `video-${videoNodeCounter}`;
+    setSlots((prev) => ({ ...prev, [newId]: { id: videoNodeCounter, status: "idle" } }));
+    const newNode: Node = {
+      id: newId,
+      type: "videoNode",
+      position: { x: 790, y: 80 + (videoNodeCounter - 1) * 300 },
+      data: { label: `Preview ${videoNodeCounter}`, slot: { id: videoNodeCounter, status: "idle" }, canGenerate: false, onGenerate: () => {} },
+    };
+    setNodes((nds) => [...nds, newNode]);
+    setEdges((eds) => [
+      ...eds,
+      { id: `e-prompt-${newId}`, source: "prompt-1", sourceHandle: "video-out", target: newId, animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
+    ]);
+  };
+
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) navigate(-1);
+    else navigate("/tools");
+  };
 
   return (
-    <div className="min-h-screen bg-background-outer">
+    <div className="h-screen w-screen flex flex-col bg-background-outer">
       {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={handleBack}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                  <Film className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-foreground">AI Video Creator</h1>
-                  <p className="text-xs text-muted-foreground hidden sm:block">
-                    Crie vídeos com inteligência artificial
-                  </p>
-                </div>
+      <header className="border-b bg-card/90 backdrop-blur-sm z-50 shrink-0">
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                <Film className="h-3.5 w-3.5 text-white" />
               </div>
+              <span className="text-sm font-bold text-foreground">AI Video Studio</span>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate("/tools")}>
-              Voltar às Ferramentas
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={addImageNode} className="h-8 text-xs gap-1.5">
+              <Plus className="h-3.5 w-3.5" />
+              Imagem
+            </Button>
+            <Button variant="outline" size="sm" onClick={addVideoNode} className="h-8 text-xs gap-1.5">
+              <Plus className="h-3.5 w-3.5" />
+              Preview
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Hero */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-sm font-medium mb-4">
-            <Sparkles className="h-4 w-4" />
-            Powered by Kling v2
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-            Crie Vídeos com IA
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Faça upload de imagens, escreva um prompt e gere vídeos incríveis em segundos
-          </p>
-        </div>
-
-        {/* Image Upload Section */}
-        <div className="mb-8">
-          <Label className="text-sm font-semibold text-foreground mb-3 block">
-            <ImageIcon className="h-4 w-4 inline mr-1.5 -mt-0.5" />
-            Imagens de Referência (opcional, máx. 2)
-          </Label>
-          <div className="grid grid-cols-2 gap-4">
-            {images.map((img, i) => (
-              <div key={i} className="relative group rounded-xl overflow-hidden border-2 border-primary/20 aspect-video bg-muted">
-                <img src={img.preview} alt={`Imagem ${i + 1}`} className="w-full h-full object-cover" />
-                <button
-                  onClick={() => handleImageRemove(i)}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-                <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-xs">
-                  Imagem {i + 1}
-                </span>
-              </div>
-            ))}
-            {images.length < 2 && (
-              <ImageUploadZone onFileSelect={handleImageAdd} />
-            )}
-          </div>
-        </div>
-
-        {/* Prompt Section */}
-        <div className="mb-8">
-          <Label className="text-sm font-semibold text-foreground mb-3 block">
-            <Sparkles className="h-4 w-4 inline mr-1.5 -mt-0.5" />
-            Prompt de Geração
-          </Label>
-          <div className="relative">
-            <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Descreva o vídeo que você quer criar... Ex: 'Uma câmera fazendo um dolly zoom em uma paisagem montanhosa ao pôr do sol, com nuvens se movendo suavemente'"
-              className="min-h-[120px] pr-4 text-base resize-none"
-              maxLength={1000}
-            />
-            <div className="flex items-center justify-between mt-3">
-              <span className="text-xs text-muted-foreground">{prompt.length}/1000</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={enhancePrompt}
-                disabled={isEnhancing || !prompt.trim()}
-                className="gap-1.5"
-              >
-                {isEnhancing ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
-                )}
-                Melhorar com IA
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Settings */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div>
-            <Label className="text-sm font-medium mb-2 block">Duração</Label>
-            <Select value={duration} onValueChange={setDuration}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 segundos</SelectItem>
-                <SelectItem value="10">10 segundos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-sm font-medium mb-2 block">Proporção</Label>
-            <Select value={aspectRatio} onValueChange={setAspectRatio}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                <SelectItem value="1:1">1:1 (Quadrado)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Video Generation Slots */}
-        <div className="mb-8">
-          <Label className="text-sm font-semibold text-foreground mb-3 block">
-            <Film className="h-4 w-4 inline mr-1.5 -mt-0.5" />
-            Geração de Vídeos (até 2 em paralelo)
-          </Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {slots.map((slot) => (
-              <VideoSlot
-                key={slot.id}
-                slot={slot}
-                canGenerate={canGenerate}
-                onGenerate={() => startGeneration(slot.id)}
-              />
-            ))}
-          </div>
-        </div>
+      {/* Canvas */}
+      <div className="flex-1 relative">
+        <ReactFlow
+          nodes={nodesWithData}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={{ padding: 0.3 }}
+          defaultEdgeOptions={{ animated: true }}
+          className="bg-background-outer"
+          proOptions={{ hideAttribution: true }}
+        >
+          <Background variant={BackgroundVariant.Dots} gap={20} size={1} className="!bg-background-outer" color="hsl(217, 91%, 60%, 0.15)" />
+          <Controls className="!bg-card !border-border !rounded-xl !shadow-lg" />
+          <MiniMap
+            className="!bg-card !border-border !rounded-xl !shadow-lg"
+            nodeColor={(node) => {
+              if (node.type === "imageNode") return "hsl(217, 91%, 60%)";
+              if (node.type === "promptNode") return "hsl(262, 83%, 58%)";
+              if (node.type === "videoNode") return "hsl(142, 76%, 36%)";
+              return "hsl(215, 16%, 47%)";
+            }}
+            maskColor="hsl(230, 100%, 94%, 0.8)"
+          />
+        </ReactFlow>
       </div>
     </div>
   );
