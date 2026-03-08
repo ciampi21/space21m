@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef } from "react";
-import { Sparkles, Upload, Image as ImageIcon, Loader2, PanelLeftClose, PanelLeftOpen, Trash2, GripVertical, Wand2 } from "lucide-react";
+import { Sparkles, Upload, Image as ImageIcon, Loader2, PanelLeftClose, PanelLeftOpen, Trash2, GripVertical, Wand2, Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,10 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [generatedAssets, setGeneratedAssets] = useState<SidebarAsset[]>([]);
+  const [uploadedAssets, setUploadedAssets] = useState<SidebarAsset[]>([]);
+  const [selectedImage, setSelectedImage] = useState<SidebarAsset | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const enhancePrompt = useCallback(async () => {
     if (!prompt.trim() || isEnhancing) return;
@@ -43,9 +48,24 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
       setIsEnhancing(false);
     }
   }, [prompt, isEnhancing]);
-  const [generatedAssets, setGeneratedAssets] = useState<SidebarAsset[]>([]);
-  const [uploadedAssets, setUploadedAssets] = useState<SidebarAsset[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const downloadImage = useCallback(async (asset: SidebarAsset) => {
+    try {
+      const response = await fetch(asset.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `generated-image-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast({ title: "Imagem baixada com sucesso!" });
+    } catch (error) {
+      toast({ title: "Erro ao baixar imagem", variant: "destructive" });
+    }
+  }, []);
 
   const generateImage = useCallback(async () => {
     if (!prompt.trim() || isGenerating) return;
@@ -121,12 +141,38 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           className="group relative aspect-square rounded-lg overflow-hidden border border-border/50 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-primary/40 transition-all bg-muted"
         >
           <img src={asset.url} alt={asset.prompt || "Asset"} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2">
             <GripVertical className="h-5 w-5 text-white opacity-0 group-hover:opacity-80 transition-opacity" />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImage(asset);
+              }}
+              className="p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white opacity-0 group-hover:opacity-100 transition-all"
+              title="Ver imagem"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                downloadImage(asset);
+              }}
+              className="p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white opacity-0 group-hover:opacity-100 transition-all"
+              title="Baixar imagem"
+            >
+              <Download className="h-4 w-4" />
+            </button>
           </div>
           <button
-            onClick={() => removeAsset(asset.id, list)}
-            className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              removeAsset(asset.id, list);
+            }}
+            className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 hover:bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-all"
+            title="Remover"
           >
             <Trash2 className="h-3 w-3" />
           </button>
@@ -240,6 +286,42 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Image Preview Modal */}
+      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+        <DialogContent className="max-w-3xl bg-zinc-950 border-white/10 p-1">
+          <DialogTitle className="sr-only">Visualizar Imagem</DialogTitle>
+          {selectedImage && (
+            <div className="relative flex flex-col gap-4 p-4">
+              <div className="w-full flex items-center justify-between">
+                <span className="text-sm font-medium text-white/90">Visualizar Imagem</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => downloadImage(selectedImage)}
+                  className="gap-2 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Download className="h-4 w-4" />
+                  Baixar Imagem
+                </Button>
+              </div>
+              <div className="relative rounded-lg overflow-hidden flex items-center justify-center bg-black/50 min-h-[50vh]">
+                <img
+                  src={selectedImage.url}
+                  alt={selectedImage.prompt || "Preview"}
+                  className="max-h-[70vh] object-contain"
+                />
+              </div>
+              {selectedImage.prompt && (
+                <div className="bg-white/5 p-3 rounded-md text-xs text-white/80 border border-white/10">
+                  <span className="font-semibold text-white/90 mr-2">Prompt:</span>
+                  {selectedImage.prompt}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
