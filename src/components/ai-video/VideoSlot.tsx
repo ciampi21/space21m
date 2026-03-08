@@ -23,7 +23,7 @@ const VideoSlot = ({ slot, canGenerate, onGenerate }: VideoSlotProps) => {
         slot.status === "completed"
           ? "border-green-500/30 bg-green-500/5"
           : slot.status === "generating"
-          ? "border-violet-500/30 bg-violet-500/5"
+          ? "border-blue-500/30 bg-blue-500/5"
           : slot.status === "error"
           ? "border-destructive/30 bg-destructive/5"
           : "border-muted-foreground/15 bg-card"
