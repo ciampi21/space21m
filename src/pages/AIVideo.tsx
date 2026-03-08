@@ -377,7 +377,7 @@ const AIVideoCanvas = () => {
               className="!bg-card !border-border !rounded-xl !shadow-lg"
               nodeColor={(node) => {
                 if (node.type === "imageNode") return "hsl(217, 91%, 60%)";
-                if (node.type === "promptNode") return "hsl(262, 83%, 58%)";
+                if (node.type === "promptNode") return "hsl(217, 71%, 50%)";
                 if (node.type === "videoNode") return "hsl(142, 76%, 36%)";
                 return "hsl(215, 16%, 47%)";
               }}
