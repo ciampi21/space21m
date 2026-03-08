@@ -79,7 +79,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 border-r border-white/10 flex flex-col items-center py-3 gap-2" style={{ backgroundColor: 'hsl(var(--login-background))' }}>
+      <div className="w-10 shrink-0 border-r border-white/10 flex flex-col items-center py-3 gap-2" style={{ backgroundColor: 'hsl(222, 47%, 11%)' }}>
         <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10">
           <PanelLeftOpen className="h-4 w-4" />
         </Button>
