@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Image, Music, Video, Headphones, FileKey } from "lucide-react";
+import { ArrowLeft, Image, Music, Video, Headphones, FileKey, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ToolCard from "@/components/tools/ToolCard";
 import ToolModal from "@/components/tools/ToolModal";
