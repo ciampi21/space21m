@@ -1,22 +1,29 @@
 
-## Mudar Fundo da Página /tools
 
-### O que a imagem 2 mostra
+## Diagnóstico
 
-A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
+Erro: `Cannot access 'enhancePrompt' before initialization` (linha 163 do AIVideo.tsx).
 
-### O que será alterado
+O `useMemo` (linha ~135) referencia `enhancePrompt` (linha 183) e `startGeneration` (linha 210), que são definidos **depois** do `useMemo`. Em JavaScript, `const` não permite acesso antes da declaração (temporal dead zone).
 
-Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
+## Correção
 
-**Fundo da página:**
-- De: `bg-background` (branco)
-- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
+**Arquivo: `src/pages/AIVideo.tsx`**
 
-### Arquivo a modificar
+Mover as funções `enhancePrompt` e `startGeneration` (e `imageToBase64` e `pollStatus` que são dependências) para **antes** do `useMemo` `nodesWithData`. Ou seja, reordenar o código para que as declarações fiquem nesta ordem:
 
-- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
+1. States (`useState`)
+2. `handleImageChange` (já está antes)
+3. `initialNodes` / `initialEdges`
+4. `useNodesState` / `useEdgesState`
+5. `onConnect`
+6. **`enhancePrompt`** (mover para cima)
+7. **`imageToBase64`** (mover para cima)
+8. **`pollStatus`** (mover para cima)
+9. **`startGeneration`** (mover para cima)
+10. `nodesWithData` (`useMemo`) — agora pode referenciar tudo acima
+11. `addImageNode`, `addVideoNode`, `handleBack`
+12. `return`
 
-### Resultado esperado
+Nenhuma lógica muda — apenas a **ordem** das declarações no componente.
 
-A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.
