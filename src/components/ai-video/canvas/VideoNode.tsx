@@ -19,7 +19,7 @@ const VideoNode = ({ data, selected }: NodeProps<VideoNodeType>) => {
 
   const statusConfig = {
     idle: { bg: "border-border/60", badge: null },
-    generating: { bg: "border-violet-500/40", badge: "bg-violet-500/10 text-violet-600" },
+    generating: { bg: "border-blue-500/40", badge: "bg-blue-500/10 text-blue-600" },
     completed: { bg: "border-green-500/40", badge: "bg-green-500/10 text-green-600" },
     error: { bg: "border-destructive/40", badge: "bg-destructive/10 text-destructive" },
   };
