@@ -41,9 +41,9 @@ const VideoSlot = ({ slot, canGenerate, onGenerate }: VideoSlotProps) => {
         {slot.status === "generating" && (
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              <Loader2 className="h-12 w-12 animate-spin text-violet-500" />
+              <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Film className="h-5 w-5 text-violet-500" />
+                <Film className="h-5 w-5 text-blue-500" />
               </div>
             </div>
             <div className="text-center">
