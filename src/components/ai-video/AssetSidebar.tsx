@@ -286,6 +286,42 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Image Preview Modal */}
+      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+        <DialogContent className="max-w-3xl bg-zinc-950 border-white/10 p-1">
+          <DialogTitle className="sr-only">Visualizar Imagem</DialogTitle>
+          {selectedImage && (
+            <div className="relative flex flex-col gap-4 p-4">
+              <div className="w-full flex items-center justify-between">
+                <span className="text-sm font-medium text-white/90">Visualizar Imagem</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => downloadImage(selectedImage)}
+                  className="gap-2 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Download className="h-4 w-4" />
+                  Baixar Imagem
+                </Button>
+              </div>
+              <div className="relative rounded-lg overflow-hidden flex items-center justify-center bg-black/50 min-h-[50vh]">
+                <img
+                  src={selectedImage.url}
+                  alt={selectedImage.prompt || "Preview"}
+                  className="max-h-[70vh] object-contain"
+                />
+              </div>
+              {selectedImage.prompt && (
+                <div className="bg-white/5 p-3 rounded-md text-xs text-white/80 border border-white/10">
+                  <span className="font-semibold text-white/90 mr-2">Prompt:</span>
+                  {selectedImage.prompt}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
