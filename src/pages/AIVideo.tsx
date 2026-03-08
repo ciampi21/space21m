@@ -327,33 +327,33 @@ const AIVideoCanvas = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background-outer">
-      <header className="border-b bg-card/90 backdrop-blur-sm z-50 shrink-0">
-        <div className="px-4 py-2.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center">
-                <Film className="h-3.5 w-3.5 text-white" />
+    <div className="h-screen w-screen flex bg-background-outer">
+      <AssetSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((p) => !p)} />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="border-b bg-card/90 backdrop-blur-sm z-50 shrink-0">
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center">
+                  <Film className="h-3.5 w-3.5 text-white" />
+                </div>
+                <span className="text-sm font-bold text-foreground">AI Video Studio</span>
               </div>
-              <span className="text-sm font-bold text-foreground">AI Video Studio</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={addImageNode} className="h-8 text-xs gap-1.5">
+                <Plus className="h-3.5 w-3.5" /> Imagem
+              </Button>
+              <Button variant="outline" size="sm" onClick={addVideoNode} className="h-8 text-xs gap-1.5">
+                <Plus className="h-3.5 w-3.5" /> Preview
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={addImageNode} className="h-8 text-xs gap-1.5">
-              <Plus className="h-3.5 w-3.5" /> Imagem
-            </Button>
-            <Button variant="outline" size="sm" onClick={addVideoNode} className="h-8 text-xs gap-1.5">
-              <Plus className="h-3.5 w-3.5" /> Preview
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex-1 flex overflow-hidden">
-        <AssetSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((p) => !p)} />
+        </header>
 
         <div className="flex-1" style={{ width: "100%", height: "100%" }}>
           <ReactFlow
