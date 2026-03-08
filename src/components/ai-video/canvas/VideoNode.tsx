@@ -93,7 +93,7 @@ const VideoNode = ({ data, selected }: NodeProps<VideoNodeType>) => {
             onClick={data.onGenerate}
             disabled={!data.canGenerate}
             size="sm"
-            className="flex-1 h-7 text-[10px] gap-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white"
+            className="flex-1 h-7 text-[10px] gap-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
           >
             <Play className="h-3 w-3" />
             Gerar Vídeo

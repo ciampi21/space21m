@@ -79,7 +79,7 @@ const VideoSlot = ({ slot, canGenerate, onGenerate }: VideoSlotProps) => {
           <Button
             onClick={onGenerate}
             disabled={!canGenerate}
-            className="flex-1 gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white"
+            className="flex-1 gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
           >
             <Play className="h-4 w-4" />
             Gerar Vídeo {slot.id}

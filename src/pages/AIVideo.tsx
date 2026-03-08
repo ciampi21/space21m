@@ -272,7 +272,7 @@ const AIVideoCanvas = () => {
     setNodes((nds) => [...nds, newNode]);
     setEdges((eds) => [
       ...eds,
-      { id: `e-prompt-${newId}`, source: "prompt-1", sourceHandle: "video-out", target: newId, animated: true, style: { stroke: "hsl(262, 83%, 58%)", strokeWidth: 2 } },
+      { id: `e-prompt-${newId}`, source: "prompt-1", sourceHandle: "video-out", target: newId, animated: true, style: { stroke: "hsl(217, 91%, 60%)", strokeWidth: 2 } },
     ]);
   };
 
