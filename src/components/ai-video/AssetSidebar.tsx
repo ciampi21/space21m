@@ -199,7 +199,7 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
           </div>
           <div className="flex-1 overflow-y-auto pb-2">
             {generatedAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-32 text-white/40">
+              <div className="flex flex-col items-center justify-center h-full text-white/40">
                 <Sparkles className="h-8 w-8 mb-2 opacity-30" />
                 <span className="text-[11px]">Imagens geradas aparecerão aqui</span>
               </div>
