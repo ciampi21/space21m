@@ -1,0 +1,173 @@
+project_id = "lqbpqecybxdylqjedwza"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[realtime]
+enabled = true
+port = 54323
+ip_version = "ipv6"
+
+[studio]
+enabled = true
+port = 54324
+api_url = "http://127.0.0.1:54321"
+openai_api_key = "env(OPENAI_API_KEY)"
+
+[inbucket]
+enabled = true
+port = 54325
+smtp_port = 54326
+pop3_port = 54327
+
+[storage]
+enabled = true
+port = 54326
+file_size_limit = "50MiB"
+image_transformation = { enabled = true }
+
+[auth]
+enabled = true
+port = 54327
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["https://127.0.0.1:3000"]
+jwt_expiry = 3600
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[functions.delete-post-safe]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.create-workspace]
+verify_jwt = true
+
+[functions.manage-user-role]
+verify_jwt = true
+
+[functions.send-invitation]
+verify_jwt = true
+
+[functions.accept-invitation]
+verify_jwt = true
+
+[functions.validate-setup-token]
+verify_jwt = false
+
+[functions.complete-setup]
+verify_jwt = false
+
+[functions.prepare-invite-setup]
+verify_jwt = false
+
+[functions.cleanup-pending-account]
+verify_jwt = true
+
+[functions.customer-portal]
+verify_jwt = true
+
+[functions.billing-cron]
+verify_jwt = false
+
+[functions.validate-post-limits]
+verify_jwt = true
+
+[functions.process-scheduled-posts]
+verify_jwt = false
+
+[functions.upload-to-r2]
+verify_jwt = true
+
+[functions.upload-to-r2-async]
+verify_jwt = true
+
+[functions.get-r2-upload-url]
+verify_jwt = true
+
+[functions.delete-from-r2]
+verify_jwt = true
+
+[functions.test-r2-connection]
+verify_jwt = true
+
+[functions.debug-env-vars]
+verify_jwt = false
+
+[functions.r2-full-test]
+verify_jwt = true
+
+[functions.download-media]
+verify_jwt = true
+
+[functions.cleanup-deleted-media]
+verify_jwt = false
+
+[functions.debug-thumbnails-cleanup]
+verify_jwt = true
+
+[functions.manual-thumbnail-cleanup]
+verify_jwt = true
+
+[functions.aggregate-monthly-analytics]
+verify_jwt = false
+
+[functions.cleanup-expired-posts]
+verify_jwt = false
+
+[functions.generate-thumbnail]
+verify_jwt = false
+
+[functions.recover-thumbnails]
+verify_jwt = false
+
+[functions.delete-workspace-complete]
+verify_jwt = true
+
+[functions.delete-user-account]
+verify_jwt = true
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.track-acquisition]
+verify_jwt = false
+
+[functions.checkout-early]
+verify_jwt = false
+
+[functions.instagram-oauth-start]
+verify_jwt = true
+
+[functions.instagram-oauth-callback]
+verify_jwt = false
+
+[functions.publish-to-instagram]
+verify_jwt = false
+
+[edge_runtime]
+enabled = true
+port = 54328
+inspector_port = 54329

@@ -1,0 +1,429 @@
+<script>
+(function() {
+  console.log('🚀 21M Space UTM tracking script loaded at:', new Date().toISOString());
+  
+  // Prevent multiple executions
+  if (window._21m_tracking_initialized) {
+    console.log('⚠️ UTM tracking already initialized, skipping...');
+    return;
+  }
+  window._21m_tracking_initialized = true;
+  
+  // Add comprehensive error handling
+  window.addEventListener('error', function(e) {
+    console.error('🔥 Global JavaScript Error in UTM script:', e.error);
+  });
+  
+  // Verify we're on the right page
+  const currentDomain = window.location.hostname;
+  console.log('🌐 Current domain:', currentDomain);
+  console.log('📍 Current URL:', window.location.href);
+  console.log('🔗 Referrer:', document.referrer);
+  
+  // Get UTM parameters from URL
+  function getUTMParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      utm_source: urlParams.get('utm_source') || '',
+      utm_medium: urlParams.get('utm_medium') || '',
+      utm_campaign: urlParams.get('utm_campaign') || '',
+      utm_term: urlParams.get('utm_term') || '',
+      utm_content: urlParams.get('utm_content') || '',
+      referralCode: urlParams.get('ref') || '',
+      referrer: document.referrer || '',
+      page_url: window.location.href,
+      user_agent: navigator.userAgent,
+      session_id: getOrCreateSessionId()
+    };
+  }
+  
+  // Generate or get existing session ID
+  function getOrCreateSessionId() {
+    try {
+      let sessionId = localStorage.getItem('21m_session_id');
+      if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('21m_session_id', sessionId);
+        console.log('Created new session ID:', sessionId);
+      } else {
+        console.log('Using existing session ID:', sessionId);
+      }
+      return sessionId;
+    } catch (error) {
+      console.error('Error managing session ID:', error);
+      // Fallback to in-memory session
+      return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+  }
+  
+  // Store UTMs in localStorage for checkout
+  function storeUTMData(utmData) {
+    localStorage.setItem('21m_utm_data', JSON.stringify(utmData));
+    console.log('UTM data stored:', utmData);
+  }
+  
+  // Append UTMs to all internal links automatically
+  function appendUTMsToInternalLinks() {
+    try {
+      // Get stored UTM data
+      const storedData = localStorage.getItem('21m_utm_data');
+      if (!storedData) {
+        console.log('No UTM data to append to links');
+        return;
+      }
+      
+      const utmData = JSON.parse(storedData);
+      
+      // Build query string from UTM parameters
+      const utmParams = new URLSearchParams();
+      if (utmData.utm_source) utmParams.append('utm_source', utmData.utm_source);
+      if (utmData.utm_medium) utmParams.append('utm_medium', utmData.utm_medium);
+      if (utmData.utm_campaign) utmParams.append('utm_campaign', utmData.utm_campaign);
+      if (utmData.utm_term) utmParams.append('utm_term', utmData.utm_term);
+      if (utmData.utm_content) utmParams.append('utm_content', utmData.utm_content);
+      if (utmData.referralCode) utmParams.append('ref', utmData.referralCode);
+      
+      const utmString = utmParams.toString();
+      if (!utmString) {
+        console.log('No UTM parameters to append');
+        return;
+      }
+      
+      console.log('Appending UTMs to internal links:', utmString);
+      
+      // Find all links on the page
+      const links = document.querySelectorAll('a[href]');
+      let modifiedCount = 0;
+      
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+        
+        // Skip external links, anchors, mailto, tel, javascript
+        if (href.startsWith('#') || 
+            href.startsWith('mailto:') || 
+            href.startsWith('tel:') || 
+            href.startsWith('javascript:')) {
+          return;
+        }
+        
+        // Check if it's an internal link
+        const isInternalLink = href.startsWith('/') || 
+                              href.startsWith('./') || 
+                              href.startsWith('../') ||
+                              href.includes('21m.space');
+        
+        // Skip external links (starting with http:// or https:// but not 21m.space)
+        if ((href.startsWith('http://') || href.startsWith('https://')) && !href.includes('21m.space')) {
+          return;
+        }
+        
+        if (isInternalLink) {
+          try {
+            let newUrl;
+            
+            // Handle relative URLs
+            if (href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
+              const separator = href.includes('?') ? '&' : '?';
+              newUrl = href + separator + utmString;
+            } else {
+              // Handle absolute URLs
+              const url = new URL(href);
+              
+              // Check if UTMs already exist - don't override them
+              const hasExistingUTMs = url.searchParams.has('utm_source') || 
+                                     url.searchParams.has('utm_medium') || 
+                                     url.searchParams.has('utm_campaign');
+              
+              if (hasExistingUTMs) {
+                return; // Keep existing UTMs
+              }
+              
+              // Add our UTMs
+              utmParams.forEach((value, key) => {
+                url.searchParams.set(key, value);
+              });
+              
+              newUrl = url.toString();
+            }
+            
+            link.setAttribute('href', newUrl);
+            modifiedCount++;
+          } catch (error) {
+            console.error('Error modifying link:', href, error);
+          }
+        }
+      });
+      
+      if (modifiedCount > 0) {
+        console.log(`✅ Modified ${modifiedCount} internal links with UTM parameters`);
+      }
+    } catch (error) {
+      console.error('Error appending UTMs to links:', error);
+    }
+  }
+  
+  // Track landing page view (debounced)
+  let trackingTimeout;
+  function trackLandingPageView() {
+    // Clear any existing timeout to prevent duplicates
+    if (trackingTimeout) {
+      clearTimeout(trackingTimeout);
+    }
+    
+    trackingTimeout = setTimeout(() => {
+      const utmData = getUTMParams();
+      storeUTMData(utmData); // Store for checkout later
+      
+      // Only track if this is actually a landing page (has UTMs or referrer)
+      if (utmData.utm_source || utmData.utm_medium || utmData.utm_campaign || utmData.referrer) {
+        console.log('Tracking landing page view with UTMs:', utmData);
+        
+        // Track the landing page view
+        fetch('https://lqbpqecybxdylqjedwza.supabase.co/functions/v1/track-acquisition', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            event_type: 'landing_page_view',
+            ...utmData
+          })
+        }).then(response => {
+          if (response.ok) {
+            console.log('Landing page view tracked successfully');
+          } else {
+            console.error('Failed to track landing page view');
+          }
+        }).catch(error => {
+          console.error('Error tracking landing page view:', error);
+        });
+      } else {
+        console.log('Skipping landing page tracking - no UTMs or referrer');
+      }
+    }, 1000); // 1 second debounce
+  }
+  
+// Enhanced checkout button detection with robust fallbacks
+  function enhanceCheckoutButtons() {
+    // Wait for buttons to be loaded with multiple attempts
+    setTimeout(() => {
+      // Find all buttons that might be checkout buttons - expanded detection
+      const buttons = document.querySelectorAll(`
+        a[href*="checkout"], 
+        a[href*="stripe.com"], 
+        a[href*="checkout-early"],
+        button[data-checkout], 
+        .checkout-btn, 
+        [class*="checkout"], 
+        [id*="checkout"],
+        a[href*="buy.stripe.com"],
+        button:contains("Checkout"),
+        button:contains("Buy"),
+        button:contains("Subscribe")
+      `.replace(/\s+/g, ' ').trim());
+      
+      // Also check for buttons with checkout-related text
+      const allButtons = document.querySelectorAll('a, button');
+      const checkoutButtons = [];
+      
+      allButtons.forEach(btn => {
+        const text = (btn.textContent || '').toLowerCase();
+        const href = btn.href || '';
+        
+        // Expanded detection for checkout buttons including "claim", "spot", etc.
+        if (text.includes('checkout') || 
+            text.includes('buy now') || 
+            text.includes('subscribe') || 
+            text.includes('comprar') ||
+            text.includes('claim') ||
+            text.includes('spot') ||
+            text.includes('get started') ||
+            text.includes('join now') ||
+            text.includes('start') ||
+            text.includes('begin') ||
+            href.includes('checkout') || 
+            href.includes('stripe.com') ||
+            href.includes('checkout-early')) {
+          checkoutButtons.push(btn);
+        }
+      });
+      
+      // Combine and deduplicate
+      const allCheckoutButtons = [...new Set([...buttons, ...checkoutButtons])];
+      
+      allCheckoutButtons.forEach(button => {
+        // Add click tracking flag to prevent duplicate listeners
+        if (!button._21m_tracking_added) {
+          button._21m_tracking_added = true;
+          
+          button.addEventListener('click', function(e) {
+            // ALWAYS prevent default for checkout buttons to ensure we control the flow
+            e.preventDefault();
+            
+            // Track button click
+            const utmData = JSON.parse(localStorage.getItem('21m_utm_data') || '{}');
+            
+            // Ensure session_id is included
+            if (!utmData.session_id) {
+              utmData.session_id = getOrCreateSessionId();
+            }
+            
+            fetch('https://lqbpqecybxdylqjedwza.supabase.co/functions/v1/track-acquisition', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                event_type: 'checkout_button_click',
+                ...utmData
+              })
+            }).then(response => {
+              if (response.ok) {
+                console.log('Checkout button click tracked successfully');
+              } else {
+                console.error('Failed to track checkout button click');
+              }
+            }).catch(error => {
+              console.error('Error tracking checkout button click:', error);
+            });
+            
+            // Always handle checkout through our custom function
+            const email = prompt('Por favor, digite seu email:');
+            if (email) {
+              createCheckoutSession(email, utmData);
+            }
+          });
+        }
+      });
+      
+      
+      // Universal fallback: Intercept ALL clicks on checkout-related elements
+      document.addEventListener('click', function(e) {
+        // Check for checkout-related elements with comprehensive selectors
+        const target = e.target.closest(`
+          a[href*="checkout-early"], 
+          a[href*="checkout"], 
+          button[class*="checkout"], 
+          [class*="claim"], 
+          [data-checkout],
+          a:contains("claim"),
+          a:contains("spot"),
+          button:contains("claim"),
+          button:contains("spot")
+        `.replace(/\s+/g, ' ').trim());
+        
+        // Also check text content more broadly
+        const clickedElement = e.target.closest('a, button');
+        if (clickedElement) {
+          const elementText = (clickedElement.textContent || '').toLowerCase();
+          const elementHref = clickedElement.href || '';
+          
+          if (target || 
+              elementText.includes('claim') || 
+              elementText.includes('spot') ||
+              elementText.includes('checkout') ||
+              elementHref.includes('checkout-early')) {
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const utmData = JSON.parse(localStorage.getItem('21m_utm_data') || '{}');
+            if (!utmData.session_id) {
+              utmData.session_id = getOrCreateSessionId();
+            }
+            
+            const email = prompt('Por favor, digite seu email para continuar:');
+            if (email) {
+              createCheckoutSession(email, utmData);
+            }
+          }
+        }
+      }, true); // Use capture phase to ensure we catch it first
+    }, 1000);
+  }
+  
+  // Create checkout session with UTMs
+  function createCheckoutSession(email, utmData) {
+    const requestBody = {
+      email: email,
+      customerName: email,
+      utmData: utmData
+    };
+    
+    fetch('https://lqbpqecybxdylqjedwza.supabase.co/functions/v1/checkout-early', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.text().then(text => {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          console.error('Failed to parse JSON response:', text);
+          throw new Error('Invalid JSON response from server');
+        }
+      });
+    })
+    .then(data => {
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.error) {
+        console.error('Checkout error:', data.error);
+        alert(`Erro: ${data.error}. Tente novamente.`);
+      } else {
+        console.error('No URL in response:', data);
+        alert('Erro ao criar sessão de checkout. Resposta inválida do servidor.');
+      }
+    })
+    .catch(error => {
+      console.error('Error creating checkout session:', error);
+      alert(`Erro ao conectar com o servidor: ${error.message}`);
+    });
+  }
+  
+  // Initialize tracking when page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      trackLandingPageView();
+      enhanceCheckoutButtons();
+    });
+  } else {
+    trackLandingPageView();
+    enhanceCheckoutButtons();
+    appendUTMsToInternalLinks();
+  }
+  
+  // Also enhance buttons that might be added dynamically (throttled)
+  let observerTimeout;
+  const observer = new MutationObserver(function(mutations) {
+    if (observerTimeout) return;
+    
+    const hasNewElements = mutations.some(mutation => 
+      Array.from(mutation.addedNodes).some(node => 
+        node.nodeType === 1 && (node.tagName === 'A' || node.tagName === 'BUTTON')
+      )
+    );
+    
+    if (hasNewElements) {
+      observerTimeout = setTimeout(() => {
+        enhanceCheckoutButtons();
+        appendUTMsToInternalLinks();
+        observerTimeout = null;
+      }, 500);
+    }
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
+</script>

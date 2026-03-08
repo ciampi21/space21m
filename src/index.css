@@ -8,89 +8,139 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* 21M Space Brand Colors */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 223 84% 4.9%;
+    --background-outer: 230 100% 94%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 223 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 223 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Professional Blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 91% 75%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Status Colors */
+    --draft: 215 16% 47%;
+    --draft-foreground: 0 0% 100%;
+    --pending: 45 93% 47%;
+    --pending-foreground: 26 83% 14%;
+    --reviewed: 217 91% 60%;
+    --reviewed-foreground: 0 0% 100%;
+    --rejected: 0 84% 60%;
+    --rejected-foreground: 0 0% 100%;
+    --approved: 142 76% 36%;
+    --approved-foreground: 0 0% 100%;
+    --scheduled: 262 83% 58%;
+    --scheduled-foreground: 0 0% 100%;
+    --posted: 142 76% 36%;
+    --posted-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Neutral Colors */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 223 47% 11%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --destructive: 0 84.2% 60.2%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 223 47% 11%;
+
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
+    /* Social Media Brand Colors */
+    --instagram: 315 100% 43%;
+    --facebook: 220 44% 41%;
+    --linkedin: 201 100% 35%;
+    --youtube: 0 100% 50%;
+    --twitter: 197 71% 52%;
+    --pinterest: 0 78% 55%;
+    --reddit: 14 100% 53%;
+
+    /* Login Page Colors */
+    --login-background: 219 61% 26%;
+    --login-video-overlay: 213 100% 8%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+    --gradient-login: linear-gradient(135deg, hsl(var(--login-background)) 0%, hsl(var(--login-video-overlay)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.3) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.2) 100%);
+
+    /* Enhanced Shadows */
+    --shadow-soft: 0 1px 3px hsl(var(--foreground) / 0.08);
+    --shadow-medium: 0 4px 12px hsl(var(--foreground) / 0.10);
+    --shadow-large: 0 10px 40px hsl(var(--foreground) / 0.12);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.3);
+    --shadow-elegant: 0 8px 30px hsl(var(--foreground) / 0.08);
+    --shadow-card: 0 2px 8px hsl(var(--foreground) / 0.06);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+
+    /* Sidebar */
     --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 223 84% 4.9%;
     --foreground: 210 40% 98%;
+    --background-outer: 223 84% 6%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 223 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 223 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 91% 45%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 33% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 33% 17.5%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217 33% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 217 33% 17.5%;
+    --input: 217 33% 17.5%;
+    --ring: 217 91% 60%;
+
+    --sidebar-background: 240 6% 10%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 240 4% 16%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -100,6 +150,135 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+}
+
+@layer utilities {
+  /* Status Text Colors */
+  .text-pending {
+    @apply text-[hsl(var(--pending))];
+  }
+  .text-reviewed {
+    @apply text-[hsl(var(--reviewed))];
+  }
+  .text-rejected {
+    @apply text-[hsl(var(--rejected))];
+  }
+  .text-approved {
+    @apply text-[hsl(var(--approved))];
+  }
+  .text-scheduled {
+    @apply text-[hsl(var(--scheduled))];
+  }
+  .text-posted {
+    @apply text-[hsl(var(--posted))];
+  }
+
+  /* Platform Text Colors */
+  .text-instagram {
+    @apply text-[hsl(var(--instagram))];
+  }
+  .text-facebook {
+    @apply text-[hsl(var(--facebook))];
+  }
+  .text-linkedin {
+    @apply text-[hsl(var(--linkedin))];
+  }
+  .text-youtube {
+    @apply text-[hsl(var(--youtube))];
+  }
+  .text-twitter {
+    @apply text-[hsl(var(--twitter))];
+  }
+  .text-pinterest {
+    @apply text-[hsl(var(--pinterest))];
+  }
+  .text-reddit {
+    @apply text-[hsl(var(--reddit))];
+  }
+
+  /* Animation utilities */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+
+  /* Interactive elements */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:scale-105 hover:shadow-large;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 ease-out hover:shadow-glow;
+  }
+
+  .fade-in-up {
+    @apply animate-slide-up;
+  }
+
+  .elegant-card {
+    @apply bg-gradient-to-br from-card to-muted/30 backdrop-blur-sm border border-border/50 shadow-card hover:shadow-elegant transition-all duration-300;
+  }
+
+  /* Text truncation utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Space-themed animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+  }
+
+  @keyframes bounce-gentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  @keyframes scale-in {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s ease-in-out infinite;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.5s ease-out;
   }
 }

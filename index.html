@@ -1,26 +1,394 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
+    <title>21M Space</title>
+    <link rel="icon" href="/lovable-uploads/d0be9c28-1265-4619-a29c-48d1ae415f56.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Manage your social media content">
     <meta name="author" content="Lovable" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    
+    
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/ebNuhD6FOjhwgQO4U3shmqecPH82/social-images/social-1757438645427-21M Space - Tutorial 1 (GIF).gif">
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/ebNuhD6FOjhwgQO4U3shmqecPH82/social-images/social-1757438645427-21M Space - Tutorial 1 (GIF).gif">
+    <meta property="og:title" content="21M Space">
+  <meta name="twitter:title" content="21M Space">
+  <meta property="og:description" content="Manage your social media content">
+  <meta name="twitter:description" content="Manage your social media content">
+</head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- UTM Tracking Script -->
+    <script>
+    (function() {
+      console.log('🚀 21M Space UTM tracking script loaded at:', new Date().toISOString());
+      
+      // Prevent multiple executions
+      if (window._21m_tracking_initialized) {
+        console.log('⚠️ UTM tracking already initialized, skipping...');
+        return;
+      }
+      window._21m_tracking_initialized = true;
+      
+      // Add comprehensive error handling
+      window.addEventListener('error', function(e) {
+        console.error('🔥 Global JavaScript Error in UTM script:', e.error);
+      });
+      
+      // Get UTM parameters from URL
+      function getUTMParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return {
+          utm_source: urlParams.get('utm_source') || '',
+          utm_medium: urlParams.get('utm_medium') || '',
+          utm_campaign: urlParams.get('utm_campaign') || '',
+          utm_term: urlParams.get('utm_term') || '',
+          utm_content: urlParams.get('utm_content') || '',
+          referrer: document.referrer || '',
+          page_url: window.location.href,
+          user_agent: navigator.userAgent,
+          session_id: getOrCreateSessionId()
+        };
+      }
+      
+      // Generate or get existing session ID
+      function getOrCreateSessionId() {
+        try {
+          let sessionId = localStorage.getItem('21m_session_id');
+          if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('21m_session_id', sessionId);
+            console.log('Created new session ID:', sessionId);
+          } else {
+            console.log('Using existing session ID:', sessionId);
+          }
+          return sessionId;
+        } catch (error) {
+          console.error('Error managing session ID:', error);
+          return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+      }
+      
+      // Store UTMs in localStorage for checkout
+      function storeUTMData(utmData) {
+        localStorage.setItem('21m_utm_data', JSON.stringify(utmData));
+        console.log('UTM data stored:', utmData);
+      }
+      
+      // Track landing page view (debounced) - only on actual landing page
+      let trackingTimeout;
+      function trackLandingPageView() {
+        // Only track landing page view if we're actually on the landing page domain
+        const isLandingPage = window.location.hostname === '21m.space' || 
+                             (window.location.hostname.includes('netlify') && window.location.pathname === '/') ||
+                             (window.location.hostname === 'localhost' && window.location.pathname === '/');
+        
+        if (!isLandingPage) {
+          console.log('Skipping landing page tracking - not on landing page domain/path');
+          const utmData = getUTMParams();
+          storeUTMData(utmData); // Still store UTM data for checkout functionality
+          return;
+        }
+        
+        if (trackingTimeout) {
+          clearTimeout(trackingTimeout);
+        }
+        
+        trackingTimeout = setTimeout(() => {
+          const utmData = getUTMParams();
+          storeUTMData(utmData);
+          
+          if (utmData.utm_source || utmData.utm_medium || utmData.utm_campaign || utmData.referrer) {
+            console.log('Tracking landing page view with UTMs:', utmData);
+            
+            fetch('https://lqbpqecybxdylqjedwza.supabase.co/functions/v1/track-acquisition', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                event_type: 'landing_page_view',
+                ...utmData
+              })
+            }).then(response => {
+              if (response.ok) {
+                console.log('Landing page view tracked successfully');
+              } else {
+                console.error('Failed to track landing page view');
+              }
+            }).catch(error => {
+              console.error('Error tracking landing page view:', error);
+            });
+          } else {
+            console.log('Skipping landing page tracking - no UTMs or referrer');
+          }
+        }, 1000);
+      }
+      
+      // Check if we should run checkout button detection on this route
+      function shouldEnhanceCheckoutButtons() {
+        const path = window.location.pathname;
+        const hostname = window.location.hostname;
+        
+        // Internal app routes where checkout buttons should NOT be enhanced
+        const internalRoutes = ['/dashboard', '/workspace', '/profile', '/auth', '/setup-account', '/accept-invite'];
+        
+        // Check if we're on an internal route
+        const isInternalRoute = internalRoutes.some(route => path.startsWith(route));
+        
+        // Only enhance checkout buttons on landing pages and pricing pages
+        const shouldEnhance = !isInternalRoute && (
+          path === '/' || 
+          path.includes('pricing') || 
+          path.includes('checkout') ||
+          hostname === '21m.space' ||
+          hostname.includes('netlify')
+        );
+        
+        console.log('Checkout button enhancement check:', {
+          path,
+          hostname,
+          isInternalRoute,
+          shouldEnhance
+        });
+        
+        return shouldEnhance;
+      }
+
+      // Enhanced checkout button detection with specific IDs
+      function enhanceCheckoutButtons() {
+        // Skip checkout button enhancement on internal app routes
+        if (!shouldEnhanceCheckoutButtons()) {
+          console.log('Skipping checkout button enhancement - internal app route');
+          return;
+        }
+        
+        console.log('🔍 Starting checkout button enhancement...');
+        
+        // Wait for React app to fully load
+        setTimeout(() => {
+          console.log('🎯 Scanning for checkout buttons...');
+          
+          // Look for specific checkout button IDs first
+          const specificButtons = document.querySelectorAll('#checkout-btn-21m, #checkout-btn-21m-upgrade');
+          console.log('🎯 Found specific checkout buttons:', specificButtons.length);
+          
+          // Also look for general checkout patterns
+          const generalButtons = document.querySelectorAll(`
+            a[href*="pricing"], 
+            a[href*="checkout"], 
+            a[href*="stripe.com"], 
+            a[href*="checkout-early"],
+            button[data-checkout], 
+            .checkout-btn, 
+            [class*="checkout"]
+          `.replace(/\s+/g, ' ').trim());
+          
+          // Text-based detection for additional fallback
+          const allButtons = document.querySelectorAll('a, button');
+          const textBasedButtons = [];
+          
+          allButtons.forEach(btn => {
+            const text = (btn.textContent || '').toLowerCase();
+            const href = btn.href || '';
+            
+            if (text.includes('upgrade') || 
+                text.includes('pro') || 
+                text.includes('pricing') ||
+                text.includes('checkout') || 
+                text.includes('buy now') || 
+                text.includes('subscribe') ||
+                href.includes('pricing') || 
+                href.includes('checkout')) {
+              textBasedButtons.push(btn);
+              console.log('🎯 Detected checkout button by text:', {
+                text: text.substring(0, 50),
+                href: href.substring(0, 100),
+                id: btn.id,
+                classes: btn.className
+              });
+            }
+          });
+          
+          // Combine all detected buttons
+          const allCheckoutButtons = [...new Set([...specificButtons, ...generalButtons, ...textBasedButtons])];
+          console.log(`✅ Total checkout buttons found: ${allCheckoutButtons.length}`);
+          
+          allCheckoutButtons.forEach(button => {
+            if (!button._21m_tracking_added) {
+              button._21m_tracking_added = true;
+              
+              button.addEventListener('click', function(e) {
+                console.log('🚀 Checkout button clicked:', {
+                  id: this.id,
+                  text: this.textContent,
+                  href: this.href
+                });
+                
+                // Skip interception for specific stripe checkout buttons
+                if (this.id === 'checkout-btn-21m' || this.id === 'checkout-btn-21m-upgrade') {
+                  console.log('✅ Allowing direct Stripe navigation for button:', this.id);
+                  return; // Let the browser navigate normally
+                }
+                
+                // Prevent default navigation for other buttons
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Track button click
+                const utmData = JSON.parse(localStorage.getItem('21m_utm_data') || '{}');
+                if (!utmData.session_id) {
+                  utmData.session_id = getOrCreateSessionId();
+                }
+                
+                console.log('Tracking checkout button click with UTM data:', utmData);
+                
+                // Track the click event
+                fetch('https://lqbpqecybxdylqjedwza.supabase.co/functions/v1/track-acquisition', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    event_type: 'checkout_button_click',
+                    ...utmData
+                  })
+                }).then(response => {
+                  if (response.ok) {
+                    console.log('Checkout button click tracked successfully');
+                  } else {
+                    console.error('Failed to track checkout button click');
+                  }
+                }).catch(error => {
+                  console.error('Error tracking checkout button click:', error);
+                });
+                
+                // Handle checkout
+                const email = prompt('Por favor, digite seu email:');
+                if (email) {
+                  console.log('📧 Email provided, creating checkout session...');
+                  createCheckoutSession(email, utmData);
+                } else {
+                  console.log('❌ No email provided, checkout cancelled');
+                }
+              });
+            }
+          });
+          
+          if (allCheckoutButtons.length === 0) {
+            console.log('No checkout buttons found on this page (expected for internal routes)');
+          }
+          
+        }, 2000); // Increased wait time for React app
+      }
+      
+      // Create checkout session with UTMs
+      function createCheckoutSession(email, utmData) {
+        console.log('🔄 Creating checkout session with data:', { email, utmData });
+        
+        const requestBody = {
+          email: email,
+          customerName: email,
+          utmData: utmData
+        };
+        
+        fetch('https://lqbpqecybxdylqjedwza.supabase.co/functions/v1/checkout-early', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+          console.log('📊 Response status:', response.status);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          return response.text().then(text => {
+            console.log('📦 Raw response text:', text);
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              console.error('❌ Failed to parse JSON response:', text);
+              throw new Error('Invalid JSON response from server');
+            }
+          });
+        })
+        .then(data => {
+          console.log('✅ Parsed response data:', data);
+          if (data.url) {
+            console.log('🚀 Redirecting to Stripe checkout:', data.url);
+            window.location.href = data.url;
+          } else if (data.error) {
+            console.error('❌ Checkout error:', data.error);
+            alert(`Erro: ${data.error}. Tente novamente.`);
+          } else {
+            console.error('❌ No URL in response:', data);
+            alert('Erro ao criar sessão de checkout. Resposta inválida do servidor.');
+          }
+        })
+        .catch(error => {
+          console.error('💥 Error creating checkout session:', error);
+          alert(`Erro ao conectar com o servidor: ${error.message}`);
+        });
+      }
+      
+      // Initialize tracking when page loads
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          trackLandingPageView();
+          enhanceCheckoutButtons();
+        });
+      } else {
+        trackLandingPageView();
+        enhanceCheckoutButtons();
+      }
+      
+      // Watch for dynamic content changes (React router, etc.) - only on relevant routes
+      let observer;
+      if (shouldEnhanceCheckoutButtons()) {
+        observer = new MutationObserver(function(mutations) {
+          let shouldRecheck = false;
+          mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length > 0) {
+              shouldRecheck = true;
+            }
+          });
+          
+          if (shouldRecheck) {
+            // Throttle the re-checking to avoid excessive calls
+            if (window._21m_observer_timeout) {
+              clearTimeout(window._21m_observer_timeout);
+            }
+            window._21m_observer_timeout = setTimeout(() => {
+              enhanceCheckoutButtons();
+            }, 500);
+          }
+        });
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+        
+        console.log('MutationObserver enabled for checkout button detection');
+      } else {
+        console.log('MutationObserver disabled - internal app route');
+      }
+    })();
+    </script>
   </body>
 </html>
