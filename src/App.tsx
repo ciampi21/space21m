@@ -16,6 +16,7 @@ import SetupAccount from "./pages/SetupAccount";
 import AcceptInvite from "./pages/AcceptInvite";
 import ThankYou from "./pages/ThankYou";
 import Tools from "./pages/Tools";
+import AIVideo from "./pages/AIVideo";
 
 const queryClient = new QueryClient();
 
