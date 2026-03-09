@@ -42,7 +42,7 @@ serve(async (req) => {
     const { data: generations, error, count } = await supabase
       .from("ai_video_generations")
       .select("*", { count: "exact" })
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
