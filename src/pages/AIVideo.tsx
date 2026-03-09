@@ -85,13 +85,13 @@ const AIVideoCanvas = () => {
       id: "image-1",
       type: "imageNode",
       position: { x: 50, y: 100 },
-      data: { label: "Imagem 1", onImageChange: handleImageChange },
+      data: { label: "Imagem 1 (início)", onImageChange: handleImageChange },
     },
     {
       id: "image-2",
       type: "imageNode",
       position: { x: 50, y: 380 },
-      data: { label: "Imagem 2", onImageChange: handleImageChange },
+      data: { label: "Imagem 2 (fim)", onImageChange: handleImageChange },
     },
     {
       id: "prompt-1",
