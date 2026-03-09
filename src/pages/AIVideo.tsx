@@ -412,13 +412,21 @@ const AIVideoCanvas = () => {
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(217, 91%, 60%, 0.15)" />
               <Controls className="!bg-card !border-border !rounded-xl !shadow-lg" />
               <MiniMap
-                className="!bg-card !border-border !rounded-xl !shadow-lg"
+                className="!bg-card !border-border !rounded-xl !shadow-lg [&_rect]:!rx-[6px] [&_rect]:!ry-[6px]"
                 nodeColor={(node) => {
-                  if (node.type === "imageNode") return "hsl(217, 91%, 60%)";
+                  if (node.type === "imageNode") return "hsl(217, 91%, 60%, 0.45)";
                   if (node.type === "promptNode") return "hsl(217, 71%, 50%)";
                   if (node.type === "videoNode") return "hsl(142, 76%, 36%)";
                   return "hsl(215, 16%, 47%)";
                 }}
+                nodeStrokeColor={(node) => {
+                  if (node.type === "imageNode") return "hsl(217, 91%, 60%, 0.6)";
+                  if (node.type === "promptNode") return "hsl(217, 71%, 50%, 0.7)";
+                  if (node.type === "videoNode") return "hsl(142, 76%, 36%, 0.7)";
+                  return "transparent";
+                }}
+                nodeStrokeWidth={1}
+                nodeBorderRadius={8}
                 maskColor="hsl(230, 100%, 94%, 0.8)"
               />
             </ReactFlow>
