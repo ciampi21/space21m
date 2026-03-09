@@ -421,12 +421,6 @@ const AIVideoCanvas = () => {
               />
             </ReactFlow>
           </div>
-
-          <VideoHistorySidebar
-            collapsed={historySidebarCollapsed}
-            onToggle={() => setHistorySidebarCollapsed((p) => !p)}
-            refreshTrigger={historyRefreshTrigger}
-          />
         </div>
       </div>
     </div>
