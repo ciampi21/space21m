@@ -1,21 +1,22 @@
 
+## Mudar Fundo da Página /tools
 
-## Problema Identificado
+### O que a imagem 2 mostra
 
-O botão "Melhorar" na aba "Gerar" (para geração de **imagens**) está chamando a função `enhance-video-prompt`, que é otimizada para prompts de **vídeo** (menciona movimento de câmera, dolly, pan, etc).
+A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
 
-## Solução
+### O que será alterado
 
-Criar uma nova edge function `enhance-image-prompt` específica para geração de imagens e atualizar o `AssetSidebar.tsx` para usá-la.
+Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
 
-### Alterações:
+**Fundo da página:**
+- De: `bg-background` (branco)
+- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
 
-1. **Nova Edge Function: `enhance-image-prompt`**
-   - System prompt focado em: composição visual, iluminação, estilo artístico, detalhes de textura, cores
-   - Sem referências a movimento de câmera ou transições
+### Arquivo a modificar
 
-2. **Atualizar `AssetSidebar.tsx`**
-   - Mudar a chamada de `enhance-video-prompt` para `enhance-image-prompt` na função `enhancePrompt()`
+- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
 
-3. **Registrar no `supabase/config.toml`**
+### Resultado esperado
 
+A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.
