@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +15,7 @@ type ImageNodeType = Node<ImageNodeData, 'imageNode'>;
 
 const ImageNode = ({ id, data, selected }: NodeProps<ImageNodeType>) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleFile = useCallback(
     (file: File) => {
@@ -31,22 +32,59 @@ const ImageNode = ({ id, data, selected }: NodeProps<ImageNodeType>) => {
     [data, id]
   );
 
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragOver(true);
+  }, []);
+
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
   const onDrop = useCallback(
-    (e: React.DragEvent) => {
+    async (e: React.DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      setIsDragOver(false);
+
+      // Check for sidebar-image JSON payload first
+      const raw = e.dataTransfer.getData("application/json");
+      if (raw) {
+        try {
+          const payload = JSON.parse(raw);
+          if (payload.type === "sidebar-image" && payload.url) {
+            const response = await fetch(payload.url);
+            const blob = await response.blob();
+            const file = new File([blob], `image-${id}.png`, { type: blob.type || "image/png" });
+            handleFile(file);
+            return;
+          }
+        } catch {
+          // fall through to native file handling
+        }
+      }
+
+      // Handle native file drop
       const file = e.dataTransfer.files[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile, id]
   );
 
   return (
     <div
       className={cn(
         "w-[220px] rounded-2xl border-2 bg-card shadow-lg transition-all duration-200 overflow-hidden",
-        selected ? "border-primary shadow-xl ring-2 ring-primary/20" : "border-border/60 hover:border-primary/40"
+        selected ? "border-primary shadow-xl ring-2 ring-primary/20" : "border-border/60 hover:border-primary/40",
+        isDragOver && "border-primary ring-2 ring-primary/30 shadow-xl"
       )}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
     >
       {/* Header */}
       <div className="px-3 py-2 bg-muted/50 border-b flex items-center gap-2">
@@ -59,7 +97,7 @@ const ImageNode = ({ id, data, selected }: NodeProps<ImageNodeType>) => {
       {/* Content */}
       <div className="p-2">
         {data.imagePreview ? (
-          <div className="relative group rounded-lg overflow-hidden aspect-video bg-muted">
+          <div className={cn("relative group rounded-lg overflow-hidden aspect-video bg-muted", isDragOver && "opacity-60")}>
             <img src={data.imagePreview} alt="Preview" className="w-full h-full object-cover" />
             <button
               onClick={(e) => {
@@ -70,16 +108,26 @@ const ImageNode = ({ id, data, selected }: NodeProps<ImageNodeType>) => {
             >
               <X className="h-3 w-3" />
             </button>
+            {isDragOver && (
+              <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-[1px]">
+                <span className="text-[10px] font-semibold text-primary">Soltar aqui</span>
+              </div>
+            )}
           </div>
         ) : (
           <div
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDrop={onDrop}
             onClick={() => inputRef.current?.click()}
-            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 aspect-video cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-all"
+            className={cn(
+              "flex flex-col items-center justify-center rounded-lg border-2 border-dashed aspect-video cursor-pointer transition-all",
+              isDragOver
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+            )}
           >
-            <Upload className="h-6 w-6 text-muted-foreground/60 mb-1" />
-            <span className="text-[10px] text-muted-foreground font-medium">Arraste ou clique</span>
+            <Upload className={cn("h-6 w-6 mb-1", isDragOver ? "text-primary" : "text-muted-foreground/60")} />
+            <span className={cn("text-[10px] font-medium", isDragOver ? "text-primary" : "text-muted-foreground")}>
+              {isDragOver ? "Soltar aqui" : "Arraste ou clique"}
+            </span>
           </div>
         )}
       </div>
