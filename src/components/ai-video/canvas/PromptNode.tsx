@@ -59,33 +59,33 @@ const PromptNode = ({ data, selected }: NodeProps<PromptNodeType>) => {
           </Select>
         </div>
 
-        {/* Aspect Ratio */}
-        <div>
-          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Aspect ratio</label>
-          <Select value={data.aspectRatio} onValueChange={data.onAspectRatioChange}>
-            <SelectTrigger className="h-8 text-xs mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-              <SelectItem value="9:16">9:16 (Vertical)</SelectItem>
-              <SelectItem value="1:1">1:1 (Quadrado)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Duration */}
-        <div>
-          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Duração</label>
-          <Select value={data.duration} onValueChange={data.onDurationChange}>
-            <SelectTrigger className="h-8 text-xs mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5 segundos</SelectItem>
-              <SelectItem value="10">10 segundos</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Aspect Ratio + Duration side by side */}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Aspect ratio</label>
+            <Select value={data.aspectRatio} onValueChange={data.onAspectRatioChange}>
+              <SelectTrigger className="h-8 text-xs mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="16:9">16:9</SelectItem>
+                <SelectItem value="9:16">9:16</SelectItem>
+                <SelectItem value="1:1">1:1</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Duração</label>
+            <Select value={data.duration} onValueChange={data.onDurationChange}>
+              <SelectTrigger className="h-8 text-xs mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5s</SelectItem>
+                <SelectItem value="10">10s</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Prompt */}
