@@ -2,7 +2,6 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Sparkles, Upload, Image as ImageIcon, Loader2, PanelLeftClose, PanelLeftOpen, Trash2, GripVertical, Wand2, Download, Eye, Film, Play, Lock, RefreshCw, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,6 +53,8 @@ export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: As
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<VideoGenRecord | null>(null);
 
+  const [activeTab, setActiveTab] = useState<"generate" | "upload" | "history">("generate");
+  
   const fetchHistory = useCallback(async () => {
     setLoadingHistory(true);
     try {
@@ -300,277 +301,234 @@ export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: As
         </Button>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="generate" className="flex-1 flex flex-col overflow-hidden">
-        <TabsList className="mx-2 mt-2 grid grid-cols-3 h-8 bg-white/10">
-          <TabsTrigger value="generate" className="text-[11px] gap-1 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white">
-            <Sparkles className="h-3 w-3" /> Gerar
-          </TabsTrigger>
-          <TabsTrigger value="upload" className="text-[11px] gap-1 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white">
-            <Upload className="h-3 w-3" /> Upload
-          </TabsTrigger>
-          <TabsTrigger value="history" className="text-[11px] gap-1 text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white">
-            <Film className="h-3 w-3" /> Histórico
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Generate Tab */}
-        <TabsContent value="generate" className="flex-1 flex flex-col overflow-hidden m-0 px-2 pt-2 gap-2">
-          <Textarea
-            placeholder="Descreva a imagem que deseja gerar..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="text-xs min-h-[120px] resize-y bg-white/10 border-white/20 text-white placeholder:text-white/40"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                generateImage();
-              }
-            }}
-          />
-          <div className="flex gap-1.5">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={enhancePrompt}
-              disabled={!prompt.trim() || isEnhancing || isGenerating}
-              className="h-8 px-2.5 text-[10px] gap-1 border-white/20 text-white/70 hover:text-white hover:bg-white/10 bg-transparent"
-              title="Melhorar prompt com IA"
-            >
-              {isEnhancing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
-              Melhorar
-            </Button>
-            <Button
-              size="sm"
-              onClick={generateImage}
-              disabled={!prompt.trim() || isGenerating}
-              className="flex-1 h-8 text-xs gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
-            >
-              {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-              {isGenerating ? "Gerando..." : "Gerar Imagem"}
-            </Button>
-          </div>
-          <div className="flex-1 overflow-y-auto pb-2">
-            {generatedAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-white/40">
-                <Sparkles className="h-8 w-8 mb-2 opacity-30" />
-                <span className="text-[11px]">Imagens geradas aparecerão aqui</span>
-              </div>
-            ) : (
-              <AssetGrid assets={generatedAssets} list="generated" />
+      {/* Tab Bar */}
+      <div className="mx-2 mt-2 mb-0 grid grid-cols-3 h-8 rounded-md bg-white/10 p-0.5 shrink-0">
+        {(["generate", "upload", "history"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "flex items-center justify-center gap-1 rounded-sm text-[11px] font-medium transition-colors",
+              activeTab === tab
+                ? "bg-white/20 text-white"
+                : "text-white/60 hover:text-white/90"
             )}
+          >
+            {tab === "generate" && <><Sparkles className="h-3 w-3" /> Gerar</>}
+            {tab === "upload" && <><Upload className="h-3 w-3" /> Upload</>}
+            {tab === "history" && <><Film className="h-3 w-3" /> Histórico</>}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {/* Generate Tab */}
+        {activeTab === "generate" && (
+          <div className="flex-1 flex flex-col overflow-hidden px-2 pt-2 gap-2">
+            <Textarea
+              placeholder="Descreva a imagem que deseja gerar..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="text-xs min-h-[120px] resize-y bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  generateImage();
+                }
+              }}
+            />
+            <div className="flex gap-1.5">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={enhancePrompt}
+                disabled={!prompt.trim() || isEnhancing || isGenerating}
+                className="h-8 px-2.5 text-[10px] gap-1 border-white/20 text-white/70 hover:text-white hover:bg-white/10 bg-transparent"
+                title="Melhorar prompt com IA"
+              >
+                {isEnhancing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+                Melhorar
+              </Button>
+              <Button
+                size="sm"
+                onClick={generateImage}
+                disabled={!prompt.trim() || isGenerating}
+                className="flex-1 h-8 text-xs gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
+              >
+                {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                {isGenerating ? "Gerando..." : "Gerar Imagem"}
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto pb-2">
+              {generatedAssets.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-white/40">
+                  <Sparkles className="h-8 w-8 mb-2 opacity-30" />
+                  <span className="text-[11px]">Imagens geradas aparecerão aqui</span>
+                </div>
+              ) : (
+                <AssetGrid assets={generatedAssets} list="generated" />
+              )}
+            </div>
           </div>
-        </TabsContent>
+        )}
 
         {/* Upload Tab */}
-        <TabsContent value="upload" className="flex-1 flex flex-col overflow-hidden m-0 px-2 pt-2 gap-2">
-          <div
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleUpload(e.dataTransfer.files); }}
-            onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 h-20 cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all"
-          >
-            <Upload className="h-5 w-5 text-white/40 mb-1" />
-            <span className="text-[10px] text-white/50 font-medium">Arraste ou clique para enviar</span>
+        {activeTab === "upload" && (
+          <div className="flex-1 flex flex-col overflow-hidden px-2 pt-2 gap-2">
+            <div
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleUpload(e.dataTransfer.files); }}
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 h-20 cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all shrink-0"
+            >
+              <Upload className="h-5 w-5 text-white/40 mb-1" />
+              <span className="text-[10px] text-white/50 font-medium">Arraste ou clique para enviar</span>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }}
+            />
+            <div className="flex-1 overflow-y-auto pb-2">
+              {uploadedAssets.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32 text-white/40">
+                  <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
+                  <span className="text-[11px]">Uploads aparecerão aqui</span>
+                </div>
+              ) : (
+                <AssetGrid assets={uploadedAssets} list="uploaded" />
+              )}
+            </div>
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }}
-          />
-          <div className="flex-1 overflow-y-auto pb-2">
-            {uploadedAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-32 text-white/40">
-                <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
-                <span className="text-[11px]">Uploads aparecerão aqui</span>
-              </div>
-            ) : (
-              <AssetGrid assets={uploadedAssets} list="uploaded" />
-            )}
-          </div>
-        </TabsContent>
+        )}
 
         {/* History Tab */}
-        <TabsContent value="history" className="flex-1 flex flex-col overflow-hidden m-0 px-2 pt-2 gap-2">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-medium text-white/60">Vídeos Gerados</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchHistory}
-              className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
-              title="Atualizar"
-            >
-              <RefreshCw className={cn("h-3 w-3", loadingHistory && "animate-spin")} />
-            </Button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto pb-2 space-y-2">
-            {loadingHistory && videoRecords.length === 0 && (
-              <div className="flex items-center justify-center h-32 text-white/40">
-                <Loader2 className="h-5 w-5 animate-spin" />
-              </div>
-            )}
+        {activeTab === "history" && (
+          <div className="flex-1 flex flex-col overflow-hidden px-2 pt-2 gap-2">
+            <div className="flex items-center justify-between shrink-0">
+              <span className="text-[10px] font-medium text-white/60">Vídeos Gerados</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={fetchHistory}
+                className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+                title="Atualizar"
+              >
+                <RefreshCw className={cn("h-3 w-3", loadingHistory && "animate-spin")} />
+              </Button>
+            </div>
 
-            {!loadingHistory && videoRecords.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-48 text-white/40 text-center px-4">
-                <Film className="h-8 w-8 mb-2 opacity-30" />
-                <span className="text-[11px]">Nenhum vídeo gerado ainda</span>
-                <span className="text-[10px] opacity-60 mt-1">Vídeos gerados aparecerão aqui automaticamente</span>
-              </div>
-            )}
-
-            {videoRecords.map((record) => {
-              const expiry = getExpiryInfo(record);
-              const isLoading = actionLoading === record.id;
-
-              return (
-                <div
-                  key={record.id}
-                  className="rounded-xl border border-white/10 bg-white/5 overflow-hidden hover:border-white/20 transition-colors"
-                >
-                  {/* Thumbnail / Preview */}
-                  <div
-                    className="relative aspect-video bg-black/40 cursor-pointer flex items-center justify-center group"
-                    onClick={() => record.video_url && setPreviewVideo(record)}
-                  >
-                    {record.thumbnail_url ? (
-                      <img
-                        src={record.thumbnail_url}
-                        alt={record.prompt}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : record.status === "generating" ? (
-                      <div className="flex flex-col items-center gap-1.5 text-blue-400">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                        <span className="text-[9px]">Gerando...</span>
-                      </div>
-                    ) : record.status === "error" ? (
-                      <div className="flex flex-col items-center gap-1 text-destructive/80">
-                        <AlertCircle className="h-6 w-6" />
-                        <span className="text-[9px]">Erro</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-1 text-white/30">
-                        <Film className="h-6 w-6" />
-                        <span className="text-[9px]">Sem preview</span>
-                      </div>
-                    )}
-
-                    {/* Status badge */}
-                    <div className="absolute top-1 left-1">
-                      {record.status === "completed" && (
-                        <span className="bg-green-500/20 text-green-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-green-500/30">
-                          <CheckCircle2 className="h-2 w-2 inline mr-0.5" />OK
-                        </span>
-                      )}
-                      {record.status === "generating" && (
-                        <span className="bg-blue-500/20 text-blue-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-blue-500/30">
-                          Gerando
-                        </span>
-                      )}
-                      {record.status === "error" && (
-                        <span className="bg-red-500/20 text-red-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-red-500/30">
-                          Erro
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Duration + ratio */}
-                    <div className="absolute top-1 right-1 flex gap-1">
-                      <span className="bg-black/60 text-white/70 text-[8px] px-1 py-0.5 rounded">
-                        {record.duration}s
-                      </span>
-                      <span className="bg-black/60 text-white/70 text-[8px] px-1 py-0.5 rounded">
-                        {record.aspect_ratio}
-                      </span>
-                    </div>
-
-                    {/* Play overlay */}
-                    {record.video_url && (
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                        <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-90 transition-opacity" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="px-2.5 py-2">
-                    <p className="text-[10px] text-white/80 line-clamp-2 leading-relaxed mb-1.5">
-                      {record.prompt}
-                    </p>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[9px] text-white/40">
-                        {formatDistanceToNow(new Date(record.created_at), { addSuffix: true, locale: ptBR })}
-                      </span>
-                      <span
-                        className={cn(
-                          "text-[9px] font-medium",
-                          expiry.urgent ? "text-orange-400" : record.is_permanent ? "text-emerald-400" : "text-white/40"
-                        )}
-                      >
-                        <Clock className="h-2 w-2 inline mr-0.5" />
-                        {expiry.label}
-                      </span>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-1">
-                      {record.video_url && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setPreviewVideo(record)}
-                          className="flex-1 h-6 text-[9px] gap-0.5 text-white/60 hover:text-white hover:bg-white/10"
-                        >
-                          <Play className="h-2.5 w-2.5" />
-                          Ver
-                        </Button>
-                      )}
-                      {record.video_url && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => downloadVideo(record)}
-                          className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/10"
-                          title="Baixar"
-                        >
-                          <Download className="h-2.5 w-2.5" />
-                        </Button>
-                      )}
-                      {!record.is_permanent && record.status === "completed" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setConfirmPermanent(record)}
-                          disabled={isLoading}
-                          className="h-6 w-6 p-0 text-yellow-400/70 hover:text-yellow-400 hover:bg-yellow-400/10"
-                          title="Salvar permanentemente"
-                        >
-                          {isLoading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Lock className="h-2.5 w-2.5" />}
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setConfirmDelete(record)}
-                        disabled={isLoading}
-                        className="h-6 w-6 p-0 text-white/40 hover:text-red-400 hover:bg-red-400/10"
-                        title="Remover do histórico"
-                      >
-                        {isLoading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Trash2 className="h-2.5 w-2.5" />}
-                      </Button>
-                    </div>
-                  </div>
+            <div className="flex-1 overflow-y-auto pb-2 space-y-2">
+              {loadingHistory && videoRecords.length === 0 && (
+                <div className="flex items-center justify-center h-32 text-white/40">
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
-              );
-            })}
+              )}
+
+              {!loadingHistory && videoRecords.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-48 text-white/40 text-center px-4">
+                  <Film className="h-8 w-8 mb-2 opacity-30" />
+                  <span className="text-[11px]">Nenhum vídeo gerado ainda</span>
+                  <span className="text-[10px] opacity-60 mt-1">Vídeos gerados aparecerão aqui automaticamente</span>
+                </div>
+              )}
+
+              {videoRecords.map((record) => {
+                const expiry = getExpiryInfo(record);
+                const isLoading = actionLoading === record.id;
+
+                return (
+                  <div
+                    key={record.id}
+                    className="rounded-xl border border-white/10 bg-white/5 overflow-hidden hover:border-white/20 transition-colors"
+                  >
+                    <div
+                      className="relative aspect-video bg-black/40 cursor-pointer flex items-center justify-center group"
+                      onClick={() => record.video_url && setPreviewVideo(record)}
+                    >
+                      {record.thumbnail_url ? (
+                        <img src={record.thumbnail_url} alt={record.prompt} className="w-full h-full object-cover" />
+                      ) : record.status === "generating" ? (
+                        <div className="flex flex-col items-center gap-1.5 text-blue-400">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                          <span className="text-[9px]">Gerando...</span>
+                        </div>
+                      ) : record.status === "error" ? (
+                        <div className="flex flex-col items-center gap-1 text-destructive/80">
+                          <AlertCircle className="h-6 w-6" />
+                          <span className="text-[9px]">Erro</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-white/30">
+                          <Film className="h-6 w-6" />
+                          <span className="text-[9px]">Sem preview</span>
+                        </div>
+                      )}
+                      <div className="absolute top-1 left-1">
+                        {record.status === "completed" && (
+                          <span className="bg-green-500/20 text-green-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-green-500/30">
+                            <CheckCircle2 className="h-2 w-2 inline mr-0.5" />OK
+                          </span>
+                        )}
+                        {record.status === "generating" && (
+                          <span className="bg-blue-500/20 text-blue-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-blue-500/30">Gerando</span>
+                        )}
+                        {record.status === "error" && (
+                          <span className="bg-red-500/20 text-red-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-red-500/30">Erro</span>
+                        )}
+                      </div>
+                      <div className="absolute top-1 right-1 flex gap-1">
+                        <span className="bg-black/60 text-white/70 text-[8px] px-1 py-0.5 rounded">{record.duration}s</span>
+                        <span className="bg-black/60 text-white/70 text-[8px] px-1 py-0.5 rounded">{record.aspect_ratio}</span>
+                      </div>
+                      {record.video_url && (
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                          <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-90 transition-opacity" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-2.5 py-2">
+                      <p className="text-[10px] text-white/80 line-clamp-2 leading-relaxed mb-1.5">{record.prompt}</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] text-white/40">
+                          {formatDistanceToNow(new Date(record.created_at), { addSuffix: true, locale: ptBR })}
+                        </span>
+                        <span className={cn("text-[9px] font-medium", expiry.urgent ? "text-orange-400" : record.is_permanent ? "text-emerald-400" : "text-white/40")}>
+                          <Clock className="h-2 w-2 inline mr-0.5" />{expiry.label}
+                        </span>
+                      </div>
+                      <div className="flex gap-1">
+                        {record.video_url && (
+                          <Button size="sm" variant="ghost" onClick={() => setPreviewVideo(record)} className="flex-1 h-6 text-[9px] gap-0.5 text-white/60 hover:text-white hover:bg-white/10">
+                            <Play className="h-2.5 w-2.5" />Ver
+                          </Button>
+                        )}
+                        {record.video_url && (
+                          <Button size="sm" variant="ghost" onClick={() => downloadVideo(record)} className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/10" title="Baixar">
+                            <Download className="h-2.5 w-2.5" />
+                          </Button>
+                        )}
+                        {!record.is_permanent && record.status === "completed" && (
+                          <Button size="sm" variant="ghost" onClick={() => setConfirmPermanent(record)} disabled={isLoading} className="h-6 w-6 p-0 text-yellow-400/70 hover:text-yellow-400 hover:bg-yellow-400/10" title="Salvar permanentemente">
+                            {isLoading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Lock className="h-2.5 w-2.5" />}
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" onClick={() => setConfirmDelete(record)} disabled={isLoading} className="h-6 w-6 p-0 text-white/40 hover:text-red-400 hover:bg-red-400/10" title="Remover do histórico">
+                          {isLoading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Trash2 className="h-2.5 w-2.5" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
 
       {/* Image Preview Modal */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
