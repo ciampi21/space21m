@@ -34,6 +34,7 @@ export interface SidebarAsset {
 interface AssetSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  refreshTrigger?: number;
 }
 
 export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps) {
