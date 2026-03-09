@@ -11,3 +11,12 @@ verify_jwt = false
 
 [functions.generate-ai-image]
 verify_jwt = false
+
+[functions.get-ai-video-generations]
+verify_jwt = false
+
+[functions.save-ai-video-generation]
+verify_jwt = false
+
+[functions.manage-ai-video-generation]
+verify_jwt = false
