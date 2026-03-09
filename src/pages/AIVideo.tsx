@@ -230,10 +230,17 @@ const AIVideoCanvas = () => {
         (e) => e.target === "prompt-1" && nodes.find((n) => n.id === e.source && n.type === "imageNode")
       );
       let imageUrl: string | undefined;
+      let tailImageUrl: string | undefined;
       if (connectedImageEdges.length > 0) {
         const firstImageNodeId = connectedImageEdges[0].source;
         const img = images[firstImageNodeId];
         if (img) imageUrl = await imageToBase64(img.file);
+      }
+      // Second connected image becomes tail_image_url (end frame)
+      if (connectedImageEdges.length > 1) {
+        const secondImageNodeId = connectedImageEdges[1].source;
+        const img2 = images[secondImageNodeId];
+        if (img2) tailImageUrl = await imageToBase64(img2.file);
       }
 
       // Create DB record first
