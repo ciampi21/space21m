@@ -37,7 +37,7 @@ interface AssetSidebarProps {
   refreshTrigger?: number;
 }
 
-export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps) {
+export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: AssetSidebarProps) {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -45,6 +45,14 @@ export default function AssetSidebar({ collapsed, onToggle }: AssetSidebarProps)
   const [uploadedAssets, setUploadedAssets] = useState<SidebarAsset[]>([]);
   const [selectedImage, setSelectedImage] = useState<SidebarAsset | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Video history state
+  const [videoRecords, setVideoRecords] = useState<VideoGenRecord[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [confirmPermanent, setConfirmPermanent] = useState<VideoGenRecord | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<VideoGenRecord | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [previewVideo, setPreviewVideo] = useState<VideoGenRecord | null>(null);
 
   const enhancePrompt = useCallback(async () => {
     if (!prompt.trim() || isEnhancing) return;
