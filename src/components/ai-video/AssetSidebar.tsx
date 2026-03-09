@@ -1,12 +1,28 @@
-import { useState, useCallback, useRef } from "react";
-import { Sparkles, Upload, Image as ImageIcon, Loader2, PanelLeftClose, PanelLeftOpen, Trash2, GripVertical, Wand2, Download, Eye } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Sparkles, Upload, Image as ImageIcon, Loader2, PanelLeftClose, PanelLeftOpen, Trash2, GripVertical, Wand2, Download, Eye, Film, Play, Lock, RefreshCw, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { formatDistanceToNow, differenceInDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+export interface VideoGenRecord {
+  id: string;
+  prompt: string;
+  duration: string;
+  aspect_ratio: string;
+  video_url: string | null;
+  thumbnail_url: string | null;
+  status: "generating" | "completed" | "error";
+  is_permanent: boolean;
+  expires_at: string | null;
+  created_at: string;
+  error_message: string | null;
+}
 
 export interface SidebarAsset {
   id: string;
