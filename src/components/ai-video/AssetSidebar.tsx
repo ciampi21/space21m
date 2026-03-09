@@ -53,6 +53,8 @@ export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: As
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<VideoGenRecord | null>(null);
 
+  const [activeTab, setActiveTab] = useState<"generate" | "upload" | "history">("generate");
+  
   const fetchHistory = useCallback(async () => {
     setLoadingHistory(true);
     try {
