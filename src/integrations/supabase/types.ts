@@ -86,6 +86,71 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_video_generations: {
+        Row: {
+          aspect_ratio: string
+          created_at: string
+          duration: string
+          error_message: string | null
+          expires_at: string | null
+          fal_request_id: string | null
+          id: string
+          is_permanent: boolean
+          prompt: string
+          source_images: Json | null
+          status: Database["public"]["Enums"]["ai_video_status"]
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+          video_url: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          aspect_ratio?: string
+          created_at?: string
+          duration?: string
+          error_message?: string | null
+          expires_at?: string | null
+          fal_request_id?: string | null
+          id?: string
+          is_permanent?: boolean
+          prompt: string
+          source_images?: Json | null
+          status?: Database["public"]["Enums"]["ai_video_status"]
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          aspect_ratio?: string
+          created_at?: string
+          duration?: string
+          error_message?: string | null
+          expires_at?: string | null
+          fal_request_id?: string | null
+          id?: string
+          is_permanent?: boolean
+          prompt?: string
+          source_images?: Json | null
+          status?: Database["public"]["Enums"]["ai_video_status"]
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_video_generations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_details: {
         Row: {
           billing_banner: string | null
@@ -1727,6 +1792,7 @@ export type Database = {
       validate_username: { Args: { username_input: string }; Returns: boolean }
     }
     Enums: {
+      ai_video_status: "generating" | "completed" | "error"
       benefit_status: "active" | "expired" | "revoked"
       benefit_tier:
         | "tier_1_base"
@@ -1906,6 +1972,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ai_video_status: ["generating", "completed", "error"],
       benefit_status: ["active", "expired", "revoked"],
       benefit_tier: [
         "tier_1_base",
