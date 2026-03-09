@@ -199,8 +199,6 @@ const AIVideoCanvas = () => {
             });
             // Refresh history sidebar
             setHistoryRefreshTrigger((n) => n + 1);
-            // Open history sidebar if collapsed
-            setHistorySidebarCollapsed(false);
           }
           return;
         }
