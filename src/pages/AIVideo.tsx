@@ -361,7 +361,11 @@ const AIVideoCanvas = () => {
 
   return (
     <div className="h-screen w-screen flex bg-background-outer">
-      <AssetSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((p) => !p)} />
+      <AssetSidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed((p) => !p)}
+        refreshTrigger={historyRefreshTrigger}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="border-b bg-card/90 backdrop-blur-sm z-50 shrink-0">
