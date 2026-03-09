@@ -1,22 +1,16 @@
 
-## Mudar Fundo da Página /tools
 
-### O que a imagem 2 mostra
+## Problema
 
-A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
+O `ImageNode` só trata drops de **arquivos nativos** (`e.dataTransfer.files`), mas o sidebar envia dados via `application/json` com `{ type: "sidebar-image", url }`. Além disso, o ReactFlow intercepta eventos de drag nos nodes, impedindo que o drop chegue ao elemento interno.
 
-### O que será alterado
+## Solução
 
-Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
+Atualizar o `onDrop` do `ImageNode` para também processar o payload JSON do sidebar (converter a URL em File via fetch/blob), além de arquivos nativos. Mover os handlers `onDragOver`/`onDrop` para o container raiz do node (não apenas a zona vazia) para funcionar mesmo quando já há imagem.
 
-**Fundo da página:**
-- De: `bg-background` (branco)
-- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
+### Alterações em `ImageNode.tsx`:
 
-### Arquivo a modificar
+1. **Expandir `onDrop`** para checar `application/json` primeiro — se tiver payload do sidebar, fazer fetch da URL, criar File e chamar `handleFile`
+2. **Mover `onDragOver`/`onDrop`** para o `div` raiz do node, para funcionar tanto com imagem já carregada quanto sem
+3. Adicionar estado visual de drag-over (highlight na borda)
 
-- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
-
-### Resultado esperado
-
-A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.
