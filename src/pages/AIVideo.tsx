@@ -25,7 +25,6 @@ import ImageNode from "@/components/ai-video/canvas/ImageNode";
 import PromptNode from "@/components/ai-video/canvas/PromptNode";
 import VideoNode from "@/components/ai-video/canvas/VideoNode";
 import AssetSidebar from "@/components/ai-video/AssetSidebar";
-import VideoHistorySidebar from "@/components/ai-video/VideoHistorySidebar";
 
 export interface VideoGeneration {
   id: number;

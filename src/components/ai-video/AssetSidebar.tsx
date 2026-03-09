@@ -607,6 +607,92 @@ export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: As
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Permanent Save Confirm Dialog */}
+      <Dialog open={!!confirmPermanent} onOpenChange={(o) => !o && setConfirmPermanent(null)}>
+        <DialogContent className="max-w-sm bg-zinc-950 border-white/10 text-white">
+          <DialogTitle className="text-base">Salvar permanentemente?</DialogTitle>
+          <DialogDescription className="text-white/60 text-sm">
+            Este vídeo não expirará mais. Vídeos permanentes não contam nos seus limites de geração.
+          </DialogDescription>
+          <div className="flex gap-2 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmPermanent(null)}
+              className="flex-1 border-white/20 text-white/70 hover:bg-white/10"
+            >
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => confirmPermanent && makePermanent(confirmPermanent)}
+              className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black font-medium"
+            >
+              <Lock className="h-3.5 w-3.5 mr-1.5" />
+              Salvar para sempre
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <DialogContent className="max-w-sm bg-zinc-950 border-white/10 text-white">
+          <DialogTitle className="text-base">Remover vídeo?</DialogTitle>
+          <DialogDescription className="text-white/60 text-sm">
+            O vídeo será removido do histórico permanentemente. Esta ação não pode ser desfeita.
+          </DialogDescription>
+          <div className="flex gap-2 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmDelete(null)}
+              className="flex-1 border-white/20 text-white/70 hover:bg-white/10"
+            >
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => confirmDelete && deleteRecord(confirmDelete)}
+              className="flex-1"
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+              Remover
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Video Preview Dialog */}
+      <Dialog open={!!previewVideo} onOpenChange={(o) => !o && setPreviewVideo(null)}>
+        <DialogContent className="max-w-3xl bg-zinc-950 border-white/10 p-2">
+          <DialogTitle className="sr-only">Preview do Vídeo</DialogTitle>
+          {previewVideo?.video_url && (
+            <div className="flex flex-col gap-3 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-white/90 line-clamp-1">{previewVideo.prompt}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => downloadVideo(previewVideo)}
+                  className="gap-1.5 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Baixar
+                </Button>
+              </div>
+              <video
+                src={previewVideo.video_url}
+                controls
+                autoPlay
+                className="w-full rounded-lg bg-black max-h-[65vh]"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
