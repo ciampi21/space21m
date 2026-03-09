@@ -250,7 +250,7 @@ const AIVideoCanvas = () => {
       const dbId = saveData?.generation?.id;
 
       const { data, error } = await supabase.functions.invoke("generate-ai-video", {
-        body: { prompt, imageUrl, duration, aspectRatio },
+        body: { prompt, imageUrl, tailImageUrl, duration, aspectRatio },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
