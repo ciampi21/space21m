@@ -24,13 +24,15 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !data?.claims?.sub) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const userId = data.claims.sub;
 
     const body = await req.json().catch(() => ({}));
     const page = Math.max(1, body.page || 1);
@@ -40,7 +42,7 @@ serve(async (req) => {
     const { data: generations, error, count } = await supabase
       .from("ai_video_generations")
       .select("*", { count: "exact" })
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
