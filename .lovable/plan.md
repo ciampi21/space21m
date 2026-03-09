@@ -1,60 +1,22 @@
 
+## Mudar Fundo da Página /tools
 
-# Análise de Segurança e Riscos do Filtro `metadata.type === "banner"`
+### O que a imagem 2 mostra
 
-## 1. Corrigirá o problema?
+A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
 
-**PARCIALMENTE — depende de ONDE o outro app coloca o metadata.**
+### O que será alterado
 
-O `event.data.object` é um objeto diferente para cada tipo de evento:
+Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
 
-| Evento | `event.data.object` é... | Tem `metadata.type = "banner"`? |
-|--------|--------------------------|--------------------------------|
-| `checkout.session.completed` | **Session** | Só se o outro app setar no checkout session |
-| `customer.subscription.created/updated/deleted` | **Subscription** | ✅ Sim (você confirmou que está na assinatura) |
-| `invoice.payment_failed/succeeded` | **Invoice** | ❌ Provavelmente NÃO (invoice metadata é separado) |
+**Fundo da página:**
+- De: `bg-background` (branco)
+- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
 
-**Risco real**: O problema principal reportado (email de boas-vindas indevido) vem do `checkout.session.completed`. O metadata precisa estar no **Session object**, não apenas na subscription. Você precisa confirmar com o outro app se o metadata `type: "banner"` é definido na **criação do checkout session** (via `session.metadata`), não apenas na subscription.
+### Arquivo a modificar
 
-## 2. Funcionará?
+- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
 
-**SIM para subscription events. INCERTO para checkout e invoice events.**
+### Resultado esperado
 
-- Se o outro app só seta metadata na subscription, eventos de `checkout.session.completed` e `invoice.*` **NÃO seriam filtrados**.
-- Para invoices: risco baixo — o update faz `.eq("email", customerEmail)` e se o usuário não existe neste app, 0 rows são afetadas.
-- Para checkout: risco ALTO — é exatamente onde o user é criado e o email é enviado.
-
-## 3. É seguro?
-
-**SIM** — o filtro é read-only, não modifica dados. Retorna 200 (evita retries do Stripe). Não afeta eventos legítimos deste app.
-
-## 4. Criará problemas/bugs?
-
-**NÃO para eventos deste app** — eventos sem `metadata.type === "banner"` passam normalmente.
-
-**Potencial falso-negativo**: se o outro app NÃO setar metadata no checkout session, o filtro não pegaria o evento problemático.
-
----
-
-## Recomendação
-
-Antes de implementar, confirme com o desenvolvedor do outro app:
-
-> "O `metadata.type = 'banner'` é definido no `stripe.checkout.sessions.create({ metadata: { type: 'banner' } })` ou apenas no subscription object?"
-
-- Se está no **checkout session** → o filtro funciona perfeitamente para o problema reportado.
-- Se está **apenas na subscription** → precisamos de abordagem diferente (ex: filtrar por price IDs conhecidos deste app, em vez de filtrar por metadata do outro).
-
-### Abordagem alternativa mais robusta
-
-Em vez de filtrar por metadata do outro app, podemos usar **allowlist dos price IDs deste app**:
-
-```typescript
-const KNOWN_PRICE_IDS = [
-  'price_1RvWXELv0YKLys0d03c5dJqn', // premium
-  'price_1RvWXELv0YKLys0dcQphItUR', // pro
-];
-```
-
-Se o checkout session não contém nenhum desses price IDs, ignorar. Isso é **mais confiável** porque não depende do outro app setar metadata corretamente.
-
+A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.

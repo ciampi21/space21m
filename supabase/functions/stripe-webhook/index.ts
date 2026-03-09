@@ -39,6 +39,46 @@ serve(async (req) => {
       return new Response("Invalid JSON", { status: 400 });
     }
 
+    // === MULTI-APP FILTER ===
+    // Filter out events from other apps sharing the same Stripe account
+    const eventMetadata = event.data?.object?.metadata;
+    if (eventMetadata?.type === "banner") {
+      console.log("Skipping event - belongs to another app (banner):", event.type);
+      return new Response(JSON.stringify({ received: true, skipped: "banner" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // Allowlist of price IDs belonging to THIS app (21M Space)
+    const KNOWN_PRICE_IDS = [
+      'price_1RvWXELv0YKLys0d03c5dJqn', // premium
+      'price_1RvWXELv0YKLys0dcQphItUR', // pro
+    ];
+
+    // For checkout and subscription events, verify price IDs belong to this app
+    if (['checkout.session.completed', 'customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'].includes(event.type)) {
+      const obj = event.data?.object;
+      let eventPriceIds: string[] = [];
+
+      // Extract price IDs from checkout session
+      if (obj?.line_items?.data) {
+        eventPriceIds = obj.line_items.data.map((item: any) => item.price?.id).filter(Boolean);
+      }
+      // Extract price IDs from subscription
+      if (obj?.items?.data) {
+        eventPriceIds = obj.items.data.map((item: any) => item.price?.id).filter(Boolean);
+      }
+
+      if (eventPriceIds.length > 0 && !eventPriceIds.some((id: string) => KNOWN_PRICE_IDS.includes(id))) {
+        console.log("Skipping event - price IDs not from this app:", eventPriceIds, "Event:", event.type);
+        return new Response(JSON.stringify({ received: true, skipped: "unknown_price" }), {
+          headers: { "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    }
+
     // Initialize Supabase client with service role key
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
