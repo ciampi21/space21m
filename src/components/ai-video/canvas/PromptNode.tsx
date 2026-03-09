@@ -95,7 +95,7 @@ const PromptNode = ({ data, selected }: NodeProps<PromptNodeType>) => {
             value={data.prompt}
             onChange={(e) => data.onPromptChange(e.target.value)}
             placeholder="Descreva o vídeo que deseja criar..."
-            className="min-h-[80px] text-xs resize-none mt-1"
+            className="min-h-[120px] text-xs resize-y mt-1"
             maxLength={1000}
           />
           <div className="flex items-center justify-between mt-1.5">
