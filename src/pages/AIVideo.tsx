@@ -25,7 +25,6 @@ import ImageNode from "@/components/ai-video/canvas/ImageNode";
 import PromptNode from "@/components/ai-video/canvas/PromptNode";
 import VideoNode from "@/components/ai-video/canvas/VideoNode";
 import AssetSidebar from "@/components/ai-video/AssetSidebar";
-import VideoHistorySidebar from "@/components/ai-video/VideoHistorySidebar";
 
 export interface VideoGeneration {
   id: number;
@@ -52,7 +51,6 @@ const AIVideoCanvas = () => {
   const navigate = useNavigate();
   const reactFlowInstance = useReactFlow();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [historySidebarCollapsed, setHistorySidebarCollapsed] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [duration, setDuration] = useState("5");
@@ -201,8 +199,6 @@ const AIVideoCanvas = () => {
             });
             // Refresh history sidebar
             setHistoryRefreshTrigger((n) => n + 1);
-            // Open history sidebar if collapsed
-            setHistorySidebarCollapsed(false);
           }
           return;
         }
@@ -365,7 +361,11 @@ const AIVideoCanvas = () => {
 
   return (
     <div className="h-screen w-screen flex bg-background-outer">
-      <AssetSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((p) => !p)} />
+      <AssetSidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed((p) => !p)}
+        refreshTrigger={historyRefreshTrigger}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="border-b bg-card/90 backdrop-blur-sm z-50 shrink-0">
@@ -423,12 +423,6 @@ const AIVideoCanvas = () => {
               />
             </ReactFlow>
           </div>
-
-          <VideoHistorySidebar
-            collapsed={historySidebarCollapsed}
-            onToggle={() => setHistorySidebarCollapsed((p) => !p)}
-            refreshTrigger={historyRefreshTrigger}
-          />
         </div>
       </div>
     </div>
