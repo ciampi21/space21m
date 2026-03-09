@@ -392,6 +392,184 @@ export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: As
             )}
           </div>
         </TabsContent>
+
+        {/* History Tab */}
+        <TabsContent value="history" className="flex-1 flex flex-col overflow-hidden m-0 px-2 pt-2 gap-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-medium text-white/60">Vídeos Gerados</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchHistory}
+              className="h-6 w-6 text-white/60 hover:text-white hover:bg-white/10"
+              title="Atualizar"
+            >
+              <RefreshCw className={cn("h-3 w-3", loadingHistory && "animate-spin")} />
+            </Button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto pb-2 space-y-2">
+            {loadingHistory && videoRecords.length === 0 && (
+              <div className="flex items-center justify-center h-32 text-white/40">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            )}
+
+            {!loadingHistory && videoRecords.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-48 text-white/40 text-center px-4">
+                <Film className="h-8 w-8 mb-2 opacity-30" />
+                <span className="text-[11px]">Nenhum vídeo gerado ainda</span>
+                <span className="text-[10px] opacity-60 mt-1">Vídeos gerados aparecerão aqui automaticamente</span>
+              </div>
+            )}
+
+            {videoRecords.map((record) => {
+              const expiry = getExpiryInfo(record);
+              const isLoading = actionLoading === record.id;
+
+              return (
+                <div
+                  key={record.id}
+                  className="rounded-xl border border-white/10 bg-white/5 overflow-hidden hover:border-white/20 transition-colors"
+                >
+                  {/* Thumbnail / Preview */}
+                  <div
+                    className="relative aspect-video bg-black/40 cursor-pointer flex items-center justify-center group"
+                    onClick={() => record.video_url && setPreviewVideo(record)}
+                  >
+                    {record.thumbnail_url ? (
+                      <img
+                        src={record.thumbnail_url}
+                        alt={record.prompt}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : record.status === "generating" ? (
+                      <div className="flex flex-col items-center gap-1.5 text-blue-400">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <span className="text-[9px]">Gerando...</span>
+                      </div>
+                    ) : record.status === "error" ? (
+                      <div className="flex flex-col items-center gap-1 text-destructive/80">
+                        <AlertCircle className="h-6 w-6" />
+                        <span className="text-[9px]">Erro</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-white/30">
+                        <Film className="h-6 w-6" />
+                        <span className="text-[9px]">Sem preview</span>
+                      </div>
+                    )}
+
+                    {/* Status badge */}
+                    <div className="absolute top-1 left-1">
+                      {record.status === "completed" && (
+                        <span className="bg-green-500/20 text-green-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-green-500/30">
+                          <CheckCircle2 className="h-2 w-2 inline mr-0.5" />OK
+                        </span>
+                      )}
+                      {record.status === "generating" && (
+                        <span className="bg-blue-500/20 text-blue-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-blue-500/30">
+                          Gerando
+                        </span>
+                      )}
+                      {record.status === "error" && (
+                        <span className="bg-red-500/20 text-red-400 text-[8px] font-medium px-1.5 py-0.5 rounded-full border border-red-500/30">
+                          Erro
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Duration + ratio */}
+                    <div className="absolute top-1 right-1 flex gap-1">
+                      <span className="bg-black/60 text-white/70 text-[8px] px-1 py-0.5 rounded">
+                        {record.duration}s
+                      </span>
+                      <span className="bg-black/60 text-white/70 text-[8px] px-1 py-0.5 rounded">
+                        {record.aspect_ratio}
+                      </span>
+                    </div>
+
+                    {/* Play overlay */}
+                    {record.video_url && (
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                        <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-90 transition-opacity" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="px-2.5 py-2">
+                    <p className="text-[10px] text-white/80 line-clamp-2 leading-relaxed mb-1.5">
+                      {record.prompt}
+                    </p>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] text-white/40">
+                        {formatDistanceToNow(new Date(record.created_at), { addSuffix: true, locale: ptBR })}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-[9px] font-medium",
+                          expiry.urgent ? "text-orange-400" : record.is_permanent ? "text-emerald-400" : "text-white/40"
+                        )}
+                      >
+                        <Clock className="h-2 w-2 inline mr-0.5" />
+                        {expiry.label}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-1">
+                      {record.video_url && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setPreviewVideo(record)}
+                          className="flex-1 h-6 text-[9px] gap-0.5 text-white/60 hover:text-white hover:bg-white/10"
+                        >
+                          <Play className="h-2.5 w-2.5" />
+                          Ver
+                        </Button>
+                      )}
+                      {record.video_url && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => downloadVideo(record)}
+                          className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                          title="Baixar"
+                        >
+                          <Download className="h-2.5 w-2.5" />
+                        </Button>
+                      )}
+                      {!record.is_permanent && record.status === "completed" && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setConfirmPermanent(record)}
+                          disabled={isLoading}
+                          className="h-6 w-6 p-0 text-yellow-400/70 hover:text-yellow-400 hover:bg-yellow-400/10"
+                          title="Salvar permanentemente"
+                        >
+                          {isLoading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Lock className="h-2.5 w-2.5" />}
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setConfirmDelete(record)}
+                        disabled={isLoading}
+                        className="h-6 w-6 p-0 text-white/40 hover:text-red-400 hover:bg-red-400/10"
+                        title="Remover do histórico"
+                      >
+                        {isLoading ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Trash2 className="h-2.5 w-2.5" />}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Image Preview Modal */}
