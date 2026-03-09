@@ -51,7 +51,6 @@ const AIVideoCanvas = () => {
   const navigate = useNavigate();
   const reactFlowInstance = useReactFlow();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [historySidebarCollapsed, setHistorySidebarCollapsed] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [duration, setDuration] = useState("5");
