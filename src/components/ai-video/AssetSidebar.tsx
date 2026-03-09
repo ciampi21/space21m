@@ -138,8 +138,8 @@ export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: As
     if (!prompt.trim() || isEnhancing) return;
     setIsEnhancing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("enhance-video-prompt", {
-        body: { prompt: prompt.trim(), imageCount: 1 },
+      const { data, error } = await supabase.functions.invoke("enhance-image-prompt", {
+        body: { prompt: prompt.trim() },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
