@@ -54,6 +54,85 @@ export default function AssetSidebar({ collapsed, onToggle, refreshTrigger }: As
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<VideoGenRecord | null>(null);
 
+  const fetchHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-ai-video-generations", {
+        body: { page: 1, limit: 50 },
+      });
+      if (error) throw error;
+      setVideoRecords(data?.generations || []);
+    } catch (e: any) {
+      console.error("Error fetching video history:", e);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [refreshTrigger, fetchHistory]);
+
+  const makePermanent = async (record: VideoGenRecord) => {
+    setActionLoading(record.id);
+    try {
+      const { error } = await supabase.functions.invoke("manage-ai-video-generation", {
+        body: { action: "make_permanent", generationId: record.id },
+      });
+      if (error) throw error;
+      setVideoRecords((prev) =>
+        prev.map((r) => (r.id === record.id ? { ...r, is_permanent: true, expires_at: null } : r))
+      );
+      toast({ title: "🔒 Vídeo salvo permanentemente!" });
+    } catch (e: any) {
+      toast({ title: "Erro ao salvar", description: e.message, variant: "destructive" });
+    } finally {
+      setActionLoading(null);
+      setConfirmPermanent(null);
+    }
+  };
+
+  const deleteRecord = async (record: VideoGenRecord) => {
+    setActionLoading(record.id);
+    try {
+      const { error } = await supabase.functions.invoke("manage-ai-video-generation", {
+        body: { action: "delete", generationId: record.id },
+      });
+      if (error) throw error;
+      setVideoRecords((prev) => prev.filter((r) => r.id !== record.id));
+      toast({ title: "Vídeo removido do histórico" });
+    } catch (e: any) {
+      toast({ title: "Erro ao remover", description: e.message, variant: "destructive" });
+    } finally {
+      setActionLoading(null);
+      setConfirmDelete(null);
+    }
+  };
+
+  const downloadVideo = async (record: VideoGenRecord) => {
+    if (!record.video_url) return;
+    try {
+      const a = document.createElement("a");
+      a.href = record.video_url;
+      a.download = `video-${record.id}.mp4`;
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      toast({ title: "Erro ao baixar vídeo", variant: "destructive" });
+    }
+  };
+
+  const getExpiryInfo = (record: VideoGenRecord) => {
+    if (record.is_permanent) return { label: "Permanente 🔒", urgent: false };
+    if (!record.expires_at) return { label: "—", urgent: false };
+    const days = differenceInDays(new Date(record.expires_at), new Date());
+    if (days <= 0) return { label: "Expirado", urgent: true };
+    if (days <= 7) return { label: `Expira em ${days}d ⚠️`, urgent: true };
+    return { label: `Expira em ${days}d`, urgent: false };
+  };
+
   const enhancePrompt = useCallback(async () => {
     if (!prompt.trim() || isEnhancing) return;
     setIsEnhancing(true);
