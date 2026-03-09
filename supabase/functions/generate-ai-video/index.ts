@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, imageUrl, duration, aspectRatio } = await req.json();
+    const { prompt, imageUrl, tailImageUrl, duration, aspectRatio } = await req.json();
 
     if (!prompt) {
       return new Response(JSON.stringify({ error: "Prompt é obrigatório" }), {
@@ -35,11 +35,21 @@ serve(async (req) => {
       body.image_url = imageUrl;
     }
 
+    // If tail image provided (second image as end frame), add it
+    if (tailImageUrl && imageUrl) {
+      body.tail_image_url = tailImageUrl;
+    }
+
+    // Use v2.1/master for image-to-video (supports tail_image_url), v2/master for text-to-video
     const endpoint = imageUrl
-      ? "https://queue.fal.run/fal-ai/kling-video/v2/master/image-to-video"
+      ? "https://queue.fal.run/fal-ai/kling-video/v2.1/master/image-to-video"
       : "https://queue.fal.run/fal-ai/kling-video/v2/master/text-to-video";
 
-    console.log("Submitting to FAL.ai:", endpoint, JSON.stringify({ prompt: body.prompt, hasImage: !!imageUrl }));
+    console.log("Submitting to FAL.ai:", endpoint, JSON.stringify({ 
+      prompt: body.prompt, 
+      hasImage: !!imageUrl, 
+      hasTailImage: !!tailImageUrl 
+    }));
 
     const response = await fetch(endpoint, {
       method: "POST",
