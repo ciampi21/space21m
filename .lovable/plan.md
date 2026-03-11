@@ -1,22 +1,31 @@
 
-## Mudar Fundo da Página /tools
 
-### O que a imagem 2 mostra
+# Diagnóstico: Erro na geração de vídeo
 
-A imagem 2 é o Dashboard, com o fundo azul-lavanda claro (`hsl(230, 100%, 94%)`) — já definido no design system como `--background-outer`. Não é um azul escuro, é o mesmo tom suave que aparece no fundo do dashboard.
+## Causa raiz
 
-### O que será alterado
+O erro **não é um bug de código**. Os logs da edge function `generate-ai-video` mostram claramente:
 
-Apenas o arquivo `src/pages/Tools.tsx`, linha 120.
+```
+FAL.ai error: 403 {"detail": "User is locked. Reason: Exhausted balance. Top up your balance at fal.ai/dashboard/billing."}
+```
 
-**Fundo da página:**
-- De: `bg-background` (branco)
-- Para: `bg-background-outer` (azul-lavanda claro do dashboard, `hsl(230, 100%, 94%)`)
+**Seu saldo na FAL.ai acabou.** A API está retornando 403 e bloqueando novas gerações.
 
-### Arquivo a modificar
+## Ação necessária
 
-- `src/pages/Tools.tsx` — somente a classe do `<div>` raiz na linha 120
+1. Acesse [fal.ai/dashboard/billing](https://fal.ai/dashboard/billing) e adicione créditos à sua conta.
 
-### Resultado esperado
+## Melhoria recomendada (código)
 
-A página `/tools` ficará com o mesmo tom de fundo azul-lavanda claro do dashboard, mantendo toda a legibilidade e contraste dos cards brancos, sem precisar alterar nenhum texto ou ícone.
+Atualmente, o erro exibido no node é genérico ("Edge Function returned a non-2xx status code"). Podemos melhorar o tratamento de erro para mostrar mensagens mais claras ao usuário:
+
+- Na `startGeneration` em `AIVideo.tsx`, o erro da FAL.ai já é retornado como `data.error`, mas quando o status HTTP é 403, o Supabase client lança um erro genérico antes de chegar ao `data`.
+- **Solução**: Na edge function `generate-ai-video/index.ts`, quando a FAL.ai retorna 403 com "Exhausted balance", retornar **status 200** com um campo `error` amigável em português, para que o frontend consiga ler a mensagem corretamente em vez de receber um erro genérico do Supabase client.
+
+### Mudança na edge function (`generate-ai-video/index.ts`):
+
+Na seção que trata o erro da FAL.ai (quando `!response.ok`), alterar para sempre retornar status 200 com o erro no body, em vez de repassar o status HTTP da FAL.ai. Isso permite que o `supabase.functions.invoke()` no frontend receba o `data.error` corretamente.
+
+Também traduzir a mensagem "Exhausted balance" para algo amigável como "Saldo FAL.ai esgotado. Recarregue em fal.ai/dashboard/billing."
+
