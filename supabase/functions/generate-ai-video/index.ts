@@ -63,8 +63,19 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("FAL.ai error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: `FAL.ai error: ${response.status} - ${errorText}` }), {
-        status: response.status,
+
+      // Return 200 with error in body so Supabase client can read it
+      let friendlyError = `Erro na FAL.ai: ${response.status}`;
+      if (response.status === 403 && errorText.includes("Exhausted balance")) {
+        friendlyError = "Saldo FAL.ai esgotado. Recarregue em fal.ai/dashboard/billing.";
+      } else if (response.status === 403) {
+        friendlyError = "Acesso negado pela FAL.ai. Verifique sua chave de API.";
+      } else if (response.status === 429) {
+        friendlyError = "Limite de requisições atingido. Aguarde alguns minutos.";
+      }
+
+      return new Response(JSON.stringify({ error: friendlyError }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
